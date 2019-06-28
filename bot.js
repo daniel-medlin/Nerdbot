@@ -4,6 +4,10 @@ const RichEmbed = require('discord.js');
 const auth = require('./auth.json');
 const prefix = "!";
 
+const roleNewUser = "587787978491953159"; //ID of new member role
+const roleMember = "587787582583078923"; //ID of member role
+const reactionMSG = "587817645416644621"; //ID of the post that requires reactions
+
 client.on('error', console.error); //display client errors without crashing
 client.on('ready', () => {
 	console.log('Logged in as '+client.user.tag+'!');
@@ -16,7 +20,7 @@ client.on('ready', () => {
 
 
 client.on('guildMemberAdd', (member) => { //add newly joined members to the new user role ewww hardcoded
-	member.addRole('587787978491953159')    //id for "New User' role on test server
+	member.addRole(roleNewUser)    //id for "New User' role on server
 		.then(console.log(member.user.username+" has joined "+ member.guild.name + " with the New User role!"))
 		.catch(console.error);
 });
@@ -25,7 +29,7 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 	//console.log(event);
 	const eventName = event.t;
 	if(eventName === 'MESSAGE_REACTION_ADD'){
-		if(event.d.message_id === '587817645416644621'){ //message ID we want to monitor for reactions
+		if(event.d.message_id === reactionMSG){ //message ID we want to monitor for reactions
 			var reactionChannel = client.channels.get(event.d.channel_id);
 			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
 				return; //already cached
@@ -42,7 +46,7 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 		}
 	}
 	else if(eventName === 'MESSAGE_REACTION_REMOVE'){ //if reaction removed...
-		if(event.d.message_id === '587817645416644621'){  //message ID we want to monitor for reactions
+		if(event.d.message_id === reactionMSG){  //message ID we want to monitor for reactions
 			var reactionChannel = client.channels.get(event.d.channel_id);
 			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
 				return; //already cached
@@ -61,12 +65,12 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 });
 
 client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to the Member role after reacting to the the rules.
-	if (messageReaction.message.id === '587817645416644621'){ //ensure we're reacting to the correct message
+	if (messageReaction.message.id === reactionMSG){ //ensure we're reacting to the correct message
 		if(messageReaction.emoji.name === '👍'){
 			var member = messageReaction.message.guild.members.find(member => member.id === user.id);
 			if(member){
-				member.addRole('587787582583078923'); //Add Members role
-				member.removeRole('587787978491953159');//remove new User role
+				member.addRole(roleMember); //Add Members role
+				member.removeRole(roleNewUser);//remove new User role
 				console.log(member.user.username + " has been added to the Members role. - "+ timestamp());
 			}
 		} else console.log("Wrong Reaction!");
@@ -74,12 +78,12 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 });
 
 client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members role if user removes reaction
-	if (messageReaction.message.id === '587817645416644621'){
+	if (messageReaction.message.id === reactionMSG){ //ensure we're reacting to the correct message
 		if(messageReaction.emoji.name === '👍'){
 			var member = messageReaction.message.guild.members.find(member => member.id === user.id);
 			if(member){
-				member.addRole('587787978491953159');//add New User role
-				member.removeRole('587787582583078923'); //remove Members role
+				member.addRole(roleNewUser);//add New User role
+				member.removeRole(roleMember); //remove Members role
 				console.log(member.user.username + " has been removed from the Members role. - "+ timestamp());
 			}
 		}
@@ -117,7 +121,7 @@ client.on('message', function(message){
 					case 'time':
 						message.delete();
 						var uname = message.author.username;
-						message.channel.send("Current Time for " + uname + ": " + timestamp());
+						message.channel.send("Current Time for " + uname + ": " + timestamp() + " GMT");
 					break;
 					case 'poll':
 						message.delete();
@@ -133,9 +137,6 @@ client.on('message', function(message){
 									var question = msg.substr(9,len) //pull just the question with no quotes.
 								poll(message.channel, uname, question)
 							}
-					break;
-					case 'bumptest':
-						message.channel.send("!d bump");
 					break;
 
 					//ADMIN COMMANDS BELOW HERE
