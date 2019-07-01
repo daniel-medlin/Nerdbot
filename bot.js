@@ -249,12 +249,12 @@ function help(channel){
 			  },
 			  {
 				"name": "Nerdbot commands", 
-				"value": "**!nrRules**: Display the rules.\n\
-				**!nrHello**: Say hello!\n\
-				**!nrPoll \"question\"**: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
+				"value": "__**!nrRules**__: Display the rules.\n\
+				__**!nrHello**__: Say hello!\n\
+				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
 				(ex. !nrPoll \"This is the correct format\")\n\
-				**!nrjoke**: Dad jokes!\n\
-				**!nrTime**__: Display your current date and time.\n\n"
+				__**!nrjoke**__: Dad jokes!\n\
+				__**!nrTime**__: Display your current date and time.\n\n"
 			  },
 			  {
 				"name": "\u200b",
