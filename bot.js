@@ -2,11 +2,13 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const RichEmbed = require('discord.js');
 const auth = require('./auth.json');
-const prefix = "!";
+const fs = require('fs');
 
 const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
 const reactionMSG = "587817645416644621"; //ID of the post that requires reactions
+const NRicon = "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png";  //Nerd Revolt Icon for embeds.
+const embedColor = 4194099; //color code for embeds.
 
 client.on('error', console.error); //display client errors without crashing
 client.on('ready', () => {
@@ -21,7 +23,7 @@ client.on('ready', () => {
 
 client.on('guildMemberAdd', (member) => { //add newly joined members to the new user role ewww hardcoded
 	member.addRole(roleNewUser)    //id for "New User' role on server
-		.then(console.log(member.user.username+" has joined "+ member.guild.name + " with the New User role!"))
+		.then(console.log(member.user.username+" has joined "+ member.guild.name + " with the New User role! - " + timestamp()))
 		.catch(console.error);
 });
 
@@ -123,6 +125,7 @@ client.on('message', function(message){
 						var uname = message.author.username;
 						message.channel.send("Current Time for " + uname + ": " + timestamp() + " GMT");
 					break;
+					//!nrPoll
 					case 'poll':
 						message.delete();
 						var uname = message.author.username;
@@ -137,6 +140,10 @@ client.on('message', function(message){
 									var question = msg.substr(9,len) //pull just the question with no quotes.
 								poll(message.channel, uname, question)
 							}
+					break;
+					//!nrJoke
+					case 'joke': 
+						joke(message.channel); //Dad jokes read from a file.  This is mostly for practice in reading files, so I can save data later on.
 					break;
 
 					//ADMIN COMMANDS BELOW HERE
@@ -190,13 +197,13 @@ function rules(channel){
 	const embed = {
 		"description": "We're a new community with a wide range of categories!  Programming, Batch, Hardware, Software, Music, Gaming, Hacking and General text and voice channels.",
 		"url": "https://discordapp.com",
-		"color": 123456,
+		"color": embedColor,
 		"thumbnail": {
-		  "url": "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png"
+		  "url": NRicon
 		},
 		"author": {
 		  "name": "Welcome to Nerd Revolt!",
-		  "icon_url": "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png"
+		  "icon_url": NRicon
 		},
 		"fields": [
 		  {
@@ -227,13 +234,13 @@ function rules(channel){
 function help(channel){
 		const embed = {
 			"description": "This bot is currently hard coded to accept new members and give them the 'New Users' role, upon accepting the rules (:thumbsup:), new users are granted the member role.",
-			"color": 123456,
+			"color": embedColor,
 			"thumbnail": {
-			  "url": "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png"
+			  "url": NRicon
 			},
 			"author": {    
 			  "name": "Nerdbot Help",
-			  "icon_url": "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png"
+			  "icon_url": NRicon
 			},
 			"fields": [
 			  {
@@ -242,11 +249,12 @@ function help(channel){
 			  },
 			  {
 				"name": "Nerdbot commands", 
-				"value": "__**!nrRules**__: Display the rules.\n\
-				__**!nrHello**__: Say hello!\n\
-				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
+				"value": "**!nrRules**: Display the rules.\n\
+				**!nrHello**: Say hello!\n\
+				**!nrPoll \"question\"**: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
 				(ex. !nrPoll \"This is the correct format\")\n\
-				__**!nrTime**__: Display your current date and time.\n\n"
+				**!nrjoke**: Dad jokes!\n\
+				**!nrTime**__: Display your current date and time.\n\n"
 			  },
 			  {
 				"name": "\u200b",
@@ -300,13 +308,13 @@ function ping(channel){
 
 function poll(channel, user, question){
 	const embed = {
-		"color": 123456,
+		"color": embedColor,
 		"thumbnail": {
-		  "url": "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png"
+		  "url": NRicon
 		},
 		"author": {    
 		  "name": user + " has posed the following question:",
-		  "icon_url": "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png"
+		  "icon_url": NRicon
 		},
 		"fields": [
 		  {
@@ -335,7 +343,16 @@ function addReactions(pollQuestion){
 		.then(() => pollQuestion.react("😶"))
 		.catch(() => console.error('One of the emojis failed to react.'));
 }
+function joke(channel){
+	var jokes;
+	fs.readFile("./jokes.txt", "utf-8", (err, buf) => {
+		if (err){console.log(err)};
+		jokes = buf.split(',');
+		var j = Math.floor(Math.random() * jokes.length) //random from 0-length of jokes[]
+		channel.send(jokes[j]);
+	});
 
+}
 
 //ADMIN FUNCTIONS BELOW THIS LINE
 //delete user specified number of messages
@@ -346,7 +363,7 @@ function del(message, number){
 			.then(message.channel.send(number + " messages deleted by " + uname + " at " + timestamp()))
 			.catch(console.error);
 	} else {
-		message.channel.send(message.author.username + " has attempted to delete " + number + " messages.\nOnly Administrators or Moderators can delete messages!  This has been flagged for review by <@&444250817680375809>");
+		message.channel.send(message.author.username + " has attempted to delete " + number + " messages.\nOnly Administrators or Moderators can delete messages!  This has been flagged for review by <@&444250817680375809>"); //Publicly shame the offender and tag moderators
 		console.log("WARNING!!!! - " + message.author.username + " has attempted to delete " + number + " messages from the " + message.channel.name + " channel.");
 	}
 }
