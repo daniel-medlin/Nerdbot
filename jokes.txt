@@ -1,71 +1,115 @@
-Why do Farts stink?  So that Deaf people can enjoy them too.,
-Why did the Hedgehog cross the road?  To see his Flat Mate.,
-Why does it take 1 million sperm to fertilize one egg?  They wont stop to ask directions.,
-Whats the difference between Big Foot and an intelligent man?  Big Foots been spotted several times.,
-What do you call a handcuffed man?  Trustworthy.,
-What did the fish say when he hit a concrete wall?  Dam.,
-Why is divorce so expensive?  Because its worth it.,
-What is black white and red all over?  A skunk with nappy rash.,
-Why did the man jump out of the window?  He wanted to catch a butterfly.,
-Why did the monkey put a piece of steak on his head?  He thought he was a griller.,
-What do you call a deer with no eyes?  No eye deer.,
-What do you call a deer with no eyes and no legs?  Still no eye deer.,
-Why was six afraid of seven?  Because seven eight nine.,
-Why did the dinosaur walk across the road?  Because chickens were not invented yet.,
-What has four wheels and flies?  A rubbish truck.,
-Whats brown and sticky?  A stick.,
-When were vowels invented?  When u and i were born.,
-Whats orange and sounds like a parrot?  A carrot.,
-What do you call a sheep with no head and legs?  A fuzz ball.,
-What do you call a fairy that hasnt bathed in a year?  Stinkerbell.,
-When is it a good time to eat a window?  When its jammed.,
-Whats the difference between a tractor and a giraffe? One has hydraulics the other has highbollocks.,
-What kind of band doesnt play music?  A highbred.,
-If one is single and two is a couple and three is a crowd what is four and five?  9 (5+4),
-What do you get when you cross a parrot and a lion?  I dont know, but when it talks youd better listen.,
-Why do giraffes have long necks?  Because they have smelly feet.,
-Why did the orange use suntan lotion?  He started to peel.,
-Where does an elephant go when he wants to lie down?  Anywhere he pleases.,
-What did the big chimney say to the little chimney?  You are too young to smoke.,
-What did the fish say to the seashores?  Can I ride on you seashorse?,
-Why did Cinderella get kicked off the baseball team?  Because she ran away from the ball.,
-A man went to play golf for the day. He took his golf clubs and two pairs of pants. What were the extra pants for?  In case he got a hole-in-one.,
-Why didnt the skeleton cross the road?  Because it had no guts.,
-I have 3 heads 5 legs 7 arms and 444 fingers. What am I?  A liar.,
-What do you get when you cross an elephant with a kangaroo?  Holes all over Australia
-What goes ha ha plonk?  Someone laughing their head off.,
-What do you get when you cross a duck with cheese?  Cheese and quackers.,
-What monster sits on the end of your finger?  The bogie man.,
-What did the computer screen say to the keyboard after it went for a ride?  That was a harddrive.,
-What is a pirates favourite letter?  R(Arrrrrggggh),
-Why did the cow jump over the moon?  Because the farmer had cold hands.,
-How do you make a tissue dance?  Put a little boogie in it.,
-How do you get a man to stop biting his nails?  Make him wear shoes.,
-Why do chicken coops have two doors?  Because if it had four doors its be a chicken sedan.,
-What is the difference between a tick and a lawyer?  A tick falls off you when you die.,
-Whats the definition of mixed emotions?  When you see your mother-in-law backing off a cliff in your new car.,
-What do call a lawyer with an IQ of 50?  Your Honor.,
-How do you know if a restaurant has a clown as a chef?  When the food tastes funny,
-What do you call a priest that becomes a lawyer? A father in law,
-What kind of photos to teeth take? Toothpics!,
-Jokes about air conditioners? Not a fan.,
-When does a joke become a dad joke? When the punchline becomes apparent.,
-What do you call a dog that does magic tricks? A labracadabrador.,
-Whats it called when a chameleon cant change its colors anymore? A reptile dysfunction.,
-Why did the cross-eyed teacher get fired? She couldnt control her pupils.,
-Where do the poor meatballs live? The sphaghetto!,
-As a wizard I like turning things into glass. I just wanted to make that clear.,
-What do you call a blind dinosaur? Do-you-think-he-saurus,
-What is the difference between girl spaghetti and man spaghetti? Meatballs.,
-Why did the mermaid start wearing seashells? Because she out grew out of B-shells. ,
-Did you hear the joke about the broken submarine? It didnt go down well,
-How do you know when the moon has enough to eat? When its full.,
-What do you give a cannibal that shows up late to dinner? A cold shoulder.,
-What do you call a police officer in bed? An undercover cop!,
-Why did the pizza maker run from the mafia? He owed them a lot of dough!,
-What is the difference between a dirty bus station and a shrimp with breast implants? One is a crusty bus station while the other is a busty crustacean.,
-What did the painting say to the wall? I go you covered.,
-Did you hear about the man who was on trial for feeding his cows dynamite? The jury said it was A-BOMB-IN-A-BULL.,
-What is the difference between a Hippo and a Zippo? A Hippo is really heavy but a Zippo is a little lighter!,
-Can a ninja throw a star? Shur-he-can!,
-What did one eye say to the other eye? Something smells between us!,
+Why do Farts stink?  So that Deaf people can enjoy them too.;
+Why did the Hedgehog cross the road?  To see his Flat Mate.;
+Why does it take 1 million sperm to fertilize one egg?  They wont stop to ask directions.;
+Whats the difference between Big Foot and an intelligent man?  Big Foots been spotted several times.;
+What do you call a handcuffed man?  Trustworthy.;
+What did the fish say when he hit a concrete wall?  Dam.;
+Why is divorce so expensive?  Because its worth it.;
+What is black white and red all over?  A skunk with nappy rash.;
+Why did the man jump out of the window?  He wanted to catch a butterfly.;
+Why did the monkey put a piece of steak on his head?  He thought he was a griller.;
+What do you call a deer with no eyes?  No eye deer.;
+What do you call a deer with no eyes and no legs?  Still no eye deer.;
+Why was six afraid of seven?  Because seven eight nine.;
+Why did the dinosaur walk across the road?  Because chickens were not invented yet.;
+What has four wheels and flies?  A rubbish truck.;
+Whats brown and sticky?  A stick.;
+When were vowels invented?  When u and i were born.;
+Whats orange and sounds like a parrot?  A carrot.;
+What do you call a sheep with no head and legs?  A fuzz ball.;
+What do you call a fairy that hasnt bathed in a year?  Stinkerbell.;
+When is it a good time to eat a window?  When its jammed.;
+Whats the difference between a tractor and a giraffe? One has hydraulics the other has highbollocks.;
+What kind of band doesnt play music?  A highbred.;
+If one is single and two is a couple and three is a crowd what is four and five?  9 (5+4);
+What do you get when you cross a parrot and a lion?  I dont know, but when it talks youd better listen.;
+Why do giraffes have long necks?  Because they have smelly feet.;
+Why did the orange use suntan lotion?  He started to peel.;
+Where does an elephant go when he wants to lie down?  Anywhere he pleases.;
+What did the big chimney say to the little chimney?  You are too young to smoke.;
+What did the fish say to the seashores?  Can I ride on you seashorse?;
+Why did Cinderella get kicked off the baseball team?  Because she ran away from the ball.;
+A man went to play golf for the day. He took his golf clubs and two pairs of pants. What were the extra pants for?  In case he got a hole-in-one.;
+Why didnt the skeleton cross the road?  Because it had no guts.;
+I have 3 heads 5 legs 7 arms and 444 fingers. What am I?  A liar.;
+What do you get when you cross an elephant with a kangaroo?  Holes all over Australi;
+What goes ha ha plonk?  Someone laughing their head off.;
+What do you get when you cross a duck with cheese?  Cheese and quackers.;
+What monster sits on the end of your finger?  The bogie man.;
+What did the computer screen say to the keyboard after it went for a ride?  That was a harddrive.;
+What is a pirates favourite letter?  R(Arrrrrggggh);
+Why did the cow jump over the moon?  Because the farmer had cold hands.;
+How do you make a tissue dance?  Put a little boogie in it.;
+How do you get a man to stop biting his nails?  Make him wear shoes.;
+Why do chicken coops have two doors?  Because if it had four doors its be a chicken sedan.;
+What is the difference between a tick and a lawyer?  A tick falls off you when you die.;
+Whats the definition of mixed emotions?  When you see your mother-in-law backing off a cliff in your new car.;
+What do call a lawyer with an IQ of 50?  Your Honor.;
+How do you know if a restaurant has a clown as a chef?  When the food tastes funny;
+What do you call a priest that becomes a lawyer? A father in law;
+What kind of photos to teeth take? Toothpics!;
+Jokes about air conditioners? Not a fan.;
+When does a joke become a dad joke? When the punchline becomes apparent.;
+What do you call a dog that does magic tricks? A labracadabrador.;
+Whats it called when a chameleon cant change its colors anymore? A reptile dysfunction.;
+Why did the cross-eyed teacher get fired? She couldnt control her pupils.;
+Where do the poor meatballs live? The sphaghetto!;
+As a wizard I like turning things into glass. I just wanted to make that clear.;
+What do you call a blind dinosaur? Do-you-think-he-saurus;
+What is the difference between girl spaghetti and man spaghetti? Meatballs.;
+Why did the mermaid start wearing seashells? Because she out grew out of B-shells. ;
+Did you hear the joke about the broken submarine? It didnt go down well;
+How do you know when the moon has enough to eat? When its full.;
+What do you give a cannibal that shows up late to dinner? A cold shoulder.;
+What do you call a police officer in bed? An undercover cop!;
+Why did the pizza maker run from the mafia? He owed them a lot of dough!;
+What is the difference between a dirty bus station and a shrimp with breast implants? One is a crusty bus station while the other is a busty crustacean.;
+What did the painting say to the wall? I go you covered.;
+Did you hear about the man who was on trial for feeding his cows dynamite? The jury said it was A-BOMB-IN-A-BULL.;
+What is the difference between a Hippo and a Zippo? A Hippo is really heavy but a Zippo is a little lighter!;
+Can a ninja throw a star? Shur-he-can!;
+What did one eye say to the other eye? Something smells between us!;
+Do you think if I made a belt of wrist watches it would be a waist of time?;
+I’m going to quit my job, and start inspecting mirrors. It’s a career I can really see myself doing.;
+Met my ex gf at the gym. Stopped going to that gym because we didn't work out.;
+Why did the pretzel call the cops? Because he was a salted.;
+Dad, did you get a haircut? No, I got them all cut!;
+My wife is really mad at the fact that I have no sense of direction. So I packed up my stuff and right!;
+How do you get a squirrel to like you? Act like a nut.;
+Why don't eggs tell jokes? They'd crack each other up.;
+I don't trust stairs. They're always up to something.;
+What do you call someone with no body and no nose? Nobody knows.;
+Did you hear the rumor about butter? Well, I'm not going to spread it!;
+Why couldn't the bicycle stand up by itself? It was two tired.;
+Dad, can you put my shoes on? No, I don't think they'll fit me.;
+Why can't a nose be 12 inches long? Because then it would be a foot.;
+This graveyard looks overcrowded. People must be dying to get in.;
+Dad, can you put the cat out? I didn't know it was on fire.;
+What time did the man go to the dentist? Tooth hurt-y.;
+How many tickles does it take to make an octopus laugh? Ten tickles.;
+Why did the scarecrow win an award? Because he was outstanding in his field.;
+I made a pencil with two erasers. It was pointless.;
+How do you make a Kleenex dance? Put a little boogie in it!;
+I'm reading a book about anti-gravity. It's impossible to put down!;
+Did you hear about the guy who invented the knock-knock joke? He won the 'no-bell' prize.;
+I've got a great joke about construction, but I'm still working on it.;
+I used to hate facial hair...but then it grew on me.;
+I decided to sell my vacuum cleaner—it was just gathering dust!;
+I had a neck brace fitted years ago and I've never looked back since.;
+You know, people say they pick their nose, but I feel like I was just born with mine.;
+What's brown and sticky? A stick.;
+Why can't you hear a psychiatrist using the bathroom? Because the 'P' is silent.;
+What do you call an elephant that doesn't matter? An irrelephant.;
+What do you get from a pampered cow? Spoiled milk.;
+It's inappropriate to make a 'dad joke' if you're not a dad. It's a faux pa.;
+Did you hear about the circus fire? It was in tents.;
+Can February March? No, but April May!;
+How do lawyers say goodbye? We'll be suing ya!;
+Wanna hear a joke about paper? Never mind—it's tearable.;
+What's the best way to watch a fly fishing tournament? Live stream.;
+Spring is here! I got so excited I wet my plants.;
+I could tell a joke about pizza, but it's a little cheesy.;
+Don't trust atoms. They make up everything!;
+When does a joke become a dad joke? When it becomes apparent.;
+I wouldn't buy anything with velcro. It's a total rip-off.;
+What’s an astronaut’s favorite part of a computer? The space bar.;

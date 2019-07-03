@@ -123,7 +123,8 @@ client.on('message', function(message){
 					case 'time':
 						message.delete();
 						var uname = message.author.username;
-						message.channel.send("Current Time for " + uname + ": " + timestamp() + " GMT");
+						var myDate = new Date();
+						message.channel.send("Current Time for " + uname + ": " + myDate);
 					break;
 					//!nrPoll
 					case 'poll':
@@ -145,6 +146,16 @@ client.on('message', function(message){
 					case 'joke': 
 						joke(message.channel); //Dad jokes read from a file.  This is mostly for practice in reading files, so I can save data later on.
 					break;
+					//!nrsource
+					case 'source': //displays an embed with link to the github.
+							displaySrc(message.channel);
+					break;
+					//!nrHelp
+					case 'help':
+						message.delete();
+						help(message.channel);
+					break;
+
 
 					//ADMIN COMMANDS BELOW HERE
 					//!nrDelete [1] allow admin to delete multiple messages
@@ -153,11 +164,7 @@ client.on('message', function(message){
 							del(message, cmd2)
 						}				
 					break;
-					//!nrHelp
-					case 'help':
-						message.delete();
-						help(message.channel);
-					break;
+					
 				}
 				
 				
@@ -169,26 +176,7 @@ client.on('message', function(message){
 
 
 function timestamp(){
-	var date = new Date(); //month
-	if ((date.getMonth()+1)<10){
-		var month = "0" + (date.getMonth()+1);
-	} else var month = (date.getMonth()+1);	
-	if (date.getDate() < 10){ //day
-		var day = "0" + date.getDate();
-	} else var day = date.getDate();
-	var year = date.getFullYear(); //year
-	if (date.getHours()<10){ //hours
-		var hours = "0" + date.getHours();
-	} else hours = date.getHours();
-	if (date.getMinutes() < 10){ //min
-		var min = "0" + date.getMinutes();
-	} else var min = date.getMinutes();
-	if (date.getSeconds() < 10){ //sec
-		var sec = "0" + date.getSeconds();
-	} else var sec = date.getSeconds();
-
-	var datetime = month + "/" + day + "/" + year + " @ " + hours + ":" + min + ":" + sec;
-		return datetime;
+		return Date(); //decided after the fact that I didn't want to format the date.  Not changing all references now...
 }
 
 //Functions available to all users
@@ -251,9 +239,10 @@ function help(channel){
 				"name": "Nerdbot commands", 
 				"value": "__**!nrRules**__: Display the rules.\n\
 				__**!nrHello**__: Say hello!\n\
+				__**!nrJoke**__: Dad jokes!\n\
 				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
 				(ex. !nrPoll \"This is the correct format\")\n\
-				__**!nrjoke**__: Dad jokes!\n\
+				__**!nrSource**__: Displays a link to the source of this bot.\n\
 				__**!nrTime**__: Display your current date and time.\n\n"
 			  },
 			  {
@@ -347,11 +336,35 @@ function joke(channel){
 	var jokes;
 	fs.readFile("./jokes.txt", "utf-8", (err, buf) => {
 		if (err){console.log(err)};
-		jokes = buf.split(',');
+		jokes = buf.split(';');
 		var j = Math.floor(Math.random() * jokes.length) //random from 0-length of jokes[]
 		channel.send(jokes[j]);
 	});
 
+}
+function displaySrc(channel){
+	const embed = {
+		"description": "The NerdBot is open source and will probably stay that way unless it becomes super popular...",
+		"color": embedColor,
+		"thumbnail": {
+		  "url": NRicon
+		},
+		"author": {    
+		  "name": "NerdBot Source",
+		  "icon_url": NRicon
+		},
+		"fields": [
+		  {
+			"name": "\u200b",
+			"value": "\u200b"
+		  },
+		  {
+			"name": "Click here for the NerdBot source", 
+			"value": "[NerdBot GitHub Link](https://github.com/b00st3d/NerdBot)\n\nIf you have any suggestions or feature requests, please DM 'b00st3d"
+		  }
+		]
+	  };
+	  channel.send({ embed });
 }
 
 //ADMIN FUNCTIONS BELOW THIS LINE
