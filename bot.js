@@ -3,6 +3,7 @@ const client = new Discord.Client();
 const RichEmbed = require('discord.js');
 const auth = require('./auth.json');
 const fs = require('fs');
+const mg = require('./mathgifs');
 
 const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
@@ -23,6 +24,7 @@ client.on('ready', () => {
 
 client.on('guildMemberAdd', (member) => { //add newly joined members to the new user role ewww hardcoded
 	member.addRole(roleNewUser)    //id for "New User' role on server
+	
 		.then(console.log(member.user.username+" has joined "+ member.guild.name + " with the New User role! - " + timestamp()))
 		.catch(console.error);
 });
@@ -155,6 +157,14 @@ client.on('message', function(message){
 						message.delete();
 						help(message.channel);
 					break;
+					//!nrMath
+					case 'math':
+						if (cmd2 == null){
+							mathGif(message, 0);
+						} else if (cmd2 === "options" || !isNaN(cmd2)){
+							mathGif(message, cmd2);
+						} else message.channel.send("Invalid argument");
+					break;
 
 
 					//ADMIN COMMANDS BELOW HERE
@@ -240,6 +250,7 @@ function help(channel){
 				"value": "__**!nrRules**__: Display the rules.\n\
 				__**!nrHello**__: Say hello!\n\
 				__**!nrJoke**__: Dad jokes!\n\
+				__**!nrMath**__: Math Gifs.  Optional arguments: options, 1-21\n\
 				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
 				(ex. !nrPoll \"This is the correct format\")\n\
 				__**!nrSource**__: Displays a link to the source of this bot.\n\
@@ -365,6 +376,33 @@ function displaySrc(channel){
 		]
 	  };
 	  channel.send({ embed });
+}
+function mathGif(message, choice){
+	var channel = message.channel;
+	const collector = new Discord.MessageCollector(channel, m => m.author.id === message.author.id, {time: 10000}); //listen for a response.
+	if (choice < 1 || choice > 21 || choice === "options"){ //if choice is outside of range of possible
+		mg.options(channel);//display options
+
+		//console.log(collector);  //this can go away after testing
+			collector.on('collect', response => {
+			if (parseInt(response) > 0 && parseInt(response) < 22){//if response is between 1 and 21, get gif
+				channel.send(mg.selection(parseInt(response))); //show the gif
+				collector.stop();
+			} else if (response.toLowerCase == "cancel"){
+				//console.log('cancel'); //TESTING
+				channel.send("Canceling request");
+				collector.stop();
+			} else {
+				channel.send("Invalid selection!  Canceling request.");
+				//console.log('invalid'); //TESTING
+				//console.log(response);
+				collector.stop();
+			}
+		})
+		
+	} else{
+		channel.send(mg.selection(choice));
+	}
 }
 
 //ADMIN FUNCTIONS BELOW THIS LINE
