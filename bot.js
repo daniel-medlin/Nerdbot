@@ -105,6 +105,9 @@ client.on('message', function(message){
 				var args = msg.substr(3).split(' '); //split the remainder of the message by spaces for each arguments
 				var cmd = args[0].toLowerCase(); //pull out the first argument and converts to lowercase.
 				var cmd2 = args[1]; //second argument
+				var uname = message.author.username; //get user that requested the command
+				var uid = message.author.id;
+				//var uid = msg.author.id; //get user ID that requested the
 				switch(cmd){
 					//!nrPing
 					case 'ping':
@@ -117,16 +120,16 @@ client.on('message', function(message){
 					break;
 					//!nrHello
 					case 'hello':
-						var uname = message.author.username;
+						//var uname = message.author.username;
 						message.delete();
 						message.channel.send("Hi there, " + uname + "!");
 					break;
 					//!nrTime
 					case 'time':
 						message.delete();
-						var uname = message.author.username;
+						//var uname = message.author.username;
 						var myDate = new Date();
-						message.channel.send("Current Time for " + uname + ": " + myDate);
+						message.channel.send("The current time is: " + myDate);
 					break;
 					//!nrPoll
 					case 'poll':
@@ -165,12 +168,11 @@ client.on('message', function(message){
 							mathGif2(message, cmd2);
 						} else message.channel.send("Invalid argument");
 					break;
-					/*
-					case 'heal':
-						message.channel.send("<@444585178023591936> be praised!");
+					//I'm the humblest
+					case 'humble':
+						message.channel.send("<@"+uid+"> be praised!");
 						message.delete();
 					break;
-					*/
 
 					//ADMIN COMMANDS BELOW HERE
 					//!nrDelete [1] allow admin to delete multiple messages
@@ -259,7 +261,7 @@ function help(channel){
 				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
 				(ex. !nrPoll \"This is the correct format\")\n\
 				__**!nrSource**__: Displays a link to the source of this bot.\n\
-				__**!nrTime**__: Display your current date and time.\n\n"
+				__**!nrTime**__: Display the current date and time.\n\n"
 			  },
 			  {
 				"name": "\u200b",
