@@ -162,10 +162,15 @@ client.on('message', function(message){
 						if (cmd2 == null){
 							mathGif(message, 0);
 						} else if (cmd2 === "options" || !isNaN(cmd2)){
-							mathGif(message, cmd2);
+							mathGif2(message, cmd2);
 						} else message.channel.send("Invalid argument");
 					break;
-
+					/*
+					case 'heal':
+						message.channel.send("<@444585178023591936> be praised!");
+						message.delete();
+					break;
+					*/
 
 					//ADMIN COMMANDS BELOW HERE
 					//!nrDelete [1] allow admin to delete multiple messages
@@ -379,29 +384,25 @@ function displaySrc(channel){
 }
 function mathGif(message, choice){
 	var channel = message.channel;
-	const collector = new Discord.MessageCollector(channel, m => m.author.id === message.author.id, {time: 10000}); //listen for a response.
-	if (choice < 1 || choice > 21 || choice === "options"){ //if choice is outside of range of possible
+	const filter = m => m.author.id === message.author.id
+	const collector = channel.createMessageCollector(filter, { time: 10000 }); //listen for a response
+	if (choice < 1 || choice > 21 || choice === "options"){ //if choice is outside the range of possible
 		mg.options(channel);//display options
+		console.log(collector); //TESTING
 
-		//console.log(collector);  //this can go away after testing
-			collector.on('collect', response => {
+		collector.on('collect', response => {
 			if (parseInt(response) > 0 && parseInt(response) < 22){//if response is between 1 and 21, get gif
 				channel.send(mg.selection(parseInt(response))); //show the gif
 				collector.stop();
-			} else if (response.toLowerCase == "cancel"){
-				//console.log('cancel'); //TESTING
+			} else if (response.content === "cancel"){
 				channel.send("Canceling request");
 				collector.stop();
 			} else {
 				channel.send("Invalid selection!  Canceling request.");
-				//console.log('invalid'); //TESTING
-				//console.log(response);
 				collector.stop();
 			}
-		})
-		
-	} else{
-		channel.send(mg.selection(choice));
+		});
+		collector.on('end', collected => console.log('Collected '+ collected.size+ ' items'));
 	}
 }
 
