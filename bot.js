@@ -5,6 +5,7 @@ const auth = require('./auth.json');
 const fs = require('fs');
 const mg = require('./mathgifs');
 
+const gid = "444186550197288970"; //ID of the guild
 const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
 const reactionMSG = "587817645416644621"; //ID of the post that requires reactions
@@ -77,7 +78,7 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 				member.removeRole(roleNewUser);//remove new User role
 				console.log(member.user.username + " has been added to the Members role. - "+ timestamp());
 			}
-		} else console.log("Wrong Reaction!");
+		} else messageReaction.remove(user); //delete the incorrect reaction
 	}
 });
 
@@ -173,6 +174,12 @@ client.on('message', function(message){
 						message.channel.send("<@"+uid+"> be praised!");
 						message.delete();
 					break;
+					//Server Statistics
+					case 'stat':
+						if (cmd2 == null){
+						serverStats(message.channel);
+						} else userStats(message, cmd2);
+					break;
 
 					//ADMIN COMMANDS BELOW HERE
 					//!nrDelete [1] allow admin to delete multiple messages
@@ -181,6 +188,16 @@ client.on('message', function(message){
 							del(message, cmd2)
 						}				
 					break;
+					//!nrParrot repeat the phrase as if coming from bot
+					case 'parrot':
+						parrot(message.channel, message);
+					break;
+					//discussion questions
+					case 'discussion':
+						message.delete();
+						discussion(message.channel, message);
+					break;
+					
 					
 				}
 				
@@ -260,6 +277,8 @@ function help(channel){
 				__**!nrMath**__: Math Gifs.  Optional arguments: options, 1-21\n\
 				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
 				(ex. !nrPoll \"This is the correct format\")\n\
+				__**!nrStat**__: Display server statistics.\n\
+				__**!nrStat @mention**__: Display the mentioned user statistics.\n\
 				__**!nrSource**__: Displays a link to the source of this bot.\n\
 				__**!nrTime**__: Display the current date and time.\n\n"
 			  },
@@ -269,7 +288,9 @@ function help(channel){
 			  },
 			  {
 				"name": "Staff commands",
-				"value":"__**!nrDelete**__ [number to delete]: Deletes requested number of posts from current channel (Staff Only)\n\n\n\
+				"value":"__**!nrDelete**__ [number to delete]: Deletes requested number of posts from current channel (Staff Only)\n\
+				__**!nrDiscussion**__: Generates a discussion question from 163 possible choices\n\
+				__**!nrParrot \"statement\"**__ \"Statement for bot to say\": Make the bot say what you say in quotes following the command \n\n\
 				**To request more commands, just DM b00st3d**"
 			  }
 			]
@@ -354,12 +375,13 @@ function joke(channel){
 	var jokes;
 	fs.readFile("./jokes.txt", "utf-8", (err, buf) => {
 		if (err){console.log(err)};
-		jokes = buf.split(';');
+		jokes = buf.split(';'); //end of line for each joke
 		var j = Math.floor(Math.random() * jokes.length) //random from 0-length of jokes[]
 		channel.send(jokes[j]);
 	});
 
 }
+
 function displaySrc(channel){
 	const embed = {
 		"description": "The NerdBot is open source and will probably stay that way unless it becomes super popular...",
@@ -408,18 +430,93 @@ function mathGif(message, choice){
 	}
 }
 
+function serverStats(channel){
+	let guild = client.guilds.get(gid);
+	let d = guild.createdAt.toDateString();
+	let numUsers = guild.memberCount;
+	let online = guild.members.filter(m => m.presence.status === 'online').size;
+
+	let createdString = "This server was started on " + d;
+	let userStat = "Number of online users: " + online + "/" + numUsers;
+	console.log(createdString);
+	console.log(userStat);
+	let ServerEmbed = new Discord.RichEmbed()
+		.setDescription("__**NerdRevolt Stats**__")
+		.setColor(embedColor)
+		.setThumbnail(NRicon)
+		.addField("\u200b", "\u200b")
+		.addField("NerdRevolt Launch Date", createdString)
+		.addField("Number of users", userStat)
+	channel.send(ServerEmbed);
+}
+
+function userStats(message, u){
+	let channel = message.channel;
+	if (u.startsWith('<@') && u.endsWith('>')){ //if the second command is a mention we can get to work.
+		let user = message.guild.member(message.mentions.users.first()); 
+		let uIcon = user.user.displayAvatarURL; //user avatar
+		var lastmsg
+		if (user.lastMessage == null){
+			lastmsg = "Never"
+		} else lastmsg = user.lastMessage.createdAt.toDateString();
+		//console.log(lastmsg);
+
+		let memberEmbed = new Discord.RichEmbed()
+		.setColor(embedColor)
+		.setThumbnail(uIcon)
+		.addField("__**Member Information**__", "\u200b")
+		.addField("Name", user)
+		.addField("ID", user.id)
+		.addField("Joined at", user.joinedAt)
+		//.addField("Last message", lastmsg)
+
+		message.channel.send(memberEmbed);
+		
+	} else {
+		channel.send("Error: Either user doesn't exist or you failed to mention them.")
+	};
+}
+
+
 //ADMIN FUNCTIONS BELOW THIS LINE
 //delete user specified number of messages
 function del(message, number){
 	var uname = message.author.username;
-	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Mod")) { //if message comes from admin or mod...
+	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
 		message.channel.bulkDelete(number)
-			.then(message.channel.send(number + " messages deleted by " + uname + " at " + timestamp()))
+			.then(message.channel.send(number + " messages deleted by " + uname))
 			.catch(console.error);
 	} else {
 		message.channel.send(message.author.username + " has attempted to delete " + number + " messages.\nOnly Administrators or Moderators can delete messages!  This has been flagged for review by <@&444250817680375809>"); //Publicly shame the offender and tag moderators
 		console.log("WARNING!!!! - " + message.author.username + " has attempted to delete " + number + " messages from the " + message.channel.name + " channel.");
 	}
+}
+
+function discussion(channel, message){
+	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
+	var discussion;
+	fs.readFile("./discussion.txt", "utf-8", (err, buf) => {
+		if (err){console.log(err)};
+		discussion = buf.split(";"); //end of line for each question
+		var j = Math.floor(Math.random() * discussion.length) //random select from discusssion questions
+		channel.send(discussion[j]);
+	});
+}
+else channel.send("Only staff can start this discussion");
+}
+
+function parrot(channel, message){
+	myMsg = message.content.split('"');
+	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
+		message.delete();
+		console.log(message.author.username + " has sent the following parrot message: \"" + myMsg[1] + "\""); //log who sent what message to console just in case.
+
+
+		
+		//HOLY FUCKING GODDAMN SHIT YOU NEEED TO CHECK THIS OUT BECAUSE IT'S THROWING WIERD WARNINGS THAT I'M TOO DRUNK TO FIGURE OUT!!!!
+		channel.send(myMsg[1]);
+
+	}else ("Only staff can run this command.");
 }
 
 
