@@ -8,7 +8,19 @@ const mg = require('./mathgifs');
 const gid = "444186550197288970"; //ID of the guild
 const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
-const reactionMSG = "587817645416644621"; //ID of the post that requires reactions
+const ruleMSG = "587817645416644621"; //ID of the rules post
+const langMSG = "619323243077173278"; //ID of the language post
+
+//language role IDs
+const batch = "619314081068875792";
+const cLang = "619314304759365633";
+const java = "619314332244770836";
+const python = "619314356039188480";
+const vb = "619314378637967371";
+const webdev = "619314416466264075";
+
+
+
 const NRicon = "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png";  //Nerd Revolt Icon for embeds.
 const embedColor = 4194099; //color code for embeds.
 
@@ -34,7 +46,21 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 	//console.log(event);
 	const eventName = event.t;
 	if(eventName === 'MESSAGE_REACTION_ADD'){
-		if(event.d.message_id === reactionMSG){ //message ID we want to monitor for reactions
+		if(event.d.message_id === ruleMSG){ //message ID we want to monitor for reactions
+			var reactionChannel = client.channels.get(event.d.channel_id);
+			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
+				return; //already cached
+			else {
+				reactionChannel.fetchMessage(event.d.message_id)
+				.then(msg => {
+						//console.log(msg);
+						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
+						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
+						client.emit('messageReactionAdd', msgReaction, user);
+				})
+				.catch(err => console.log(err));
+			}
+		} else if(event.d.message_id === langMSG){ //message ID for language post
 			var reactionChannel = client.channels.get(event.d.channel_id);
 			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
 				return; //already cached
@@ -51,14 +77,26 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 		}
 	}
 	else if(eventName === 'MESSAGE_REACTION_REMOVE'){ //if reaction removed...
-		if(event.d.message_id === reactionMSG){  //message ID we want to monitor for reactions
+		if(event.d.message_id === ruleMSG){  //message ID we want to monitor for reactions
 			var reactionChannel = client.channels.get(event.d.channel_id);
 			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
 				return; //already cached
 			else {
 				reactionChannel.fetchMessage(event.d.message_id)
 				.then(msg => {
-						//console.log(msg);
+						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
+						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
+						client.emit('messageReactionRemove', msgReaction, user);
+				})
+				.catch(err => console.log(err));
+			}
+		} else if(event.d.message_id === langMSG){  //message ID for language post
+			var reactionChannel = client.channels.get(event.d.channel_id);
+			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
+				return; //already cached
+			else {
+				reactionChannel.fetchMessage(event.d.message_id)
+				.then(msg => {
 						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
 						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
 						client.emit('messageReactionRemove', msgReaction, user);
@@ -70,7 +108,7 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 });
 
 client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to the Member role after reacting to the the rules.
-	if (messageReaction.message.id === reactionMSG){ //ensure we're reacting to the correct message
+	if (messageReaction.message.id === ruleMSG){ //ensure we're reacting to the correct message
 		if(messageReaction.emoji.name === '👍'){
 			var member = messageReaction.message.guild.members.find(member => member.id === user.id);
 			if(member){
@@ -78,12 +116,45 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 				member.removeRole(roleNewUser);//remove new User role
 				console.log(member.user.username + " has been added to the Members role. - "+ timestamp());
 			}
-		} else messageReaction.remove(user); //delete the incorrect reaction
+		} else {
+			console.log("Wrong Reaction!");
+			messageReaction.remove(user);
+		}	
+	} else if (messageReaction.message.id === langMSG){ //reactions on language message
+		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
+		switch(messageReaction.emoji.name){
+			case '🇧':
+				member.addRole(batch);
+				user.send("You have been added to the Batch role.");
+			break;
+			case '🇨':
+				member.addRole(cLang);
+				user.send("You have been added to the C role.");
+			break;
+			case '🇯':
+				member.addRole(java);
+				user.send("You have been added to the Java role.");
+			break;
+			case '🇵':
+				member.addRole(python);
+				user.send("You have been added to the Python role.");
+			break;
+			case '🇻':
+				member.addRole(vb);
+				user.send("You have been added to the VB role.");
+			break;
+			case '🇼':
+				member.addRole(webdev);
+				user.send("You have been added to the WebDev role.");
+			break;
+			default:
+				messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
+		}
 	}
 });
 
 client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members role if user removes reaction
-	if (messageReaction.message.id === reactionMSG){ //ensure we're reacting to the correct message
+	if (messageReaction.message.id === ruleMSG){ //ensure we're reacting to the correct message
 		if(messageReaction.emoji.name === '👍'){
 			var member = messageReaction.message.guild.members.find(member => member.id === user.id);
 			if(member){
@@ -92,7 +163,35 @@ client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members
 				console.log(member.user.username + " has been removed from the Members role. - "+ timestamp());
 			}
 		}
-	}	
+	} else if (messageReaction.message.id === langMSG){
+		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
+		switch(messageReaction.emoji.name){
+			case '🇧':
+				member.removeRole(batch);
+				user.send("You have been removed from the Batch role.");
+			break;
+			case '🇨':
+				member.removeRole(cLang);
+				user.send("You have been removed from the C role.");
+			break;
+			case '🇯':
+				member.removeRole(java);
+				user.send("You have been removed from the Java role.");
+			break;
+			case '🇵':
+				member.removeRole(python);
+				user.send("You have been removed from the Python role.");
+			break;
+			case '🇻':
+				member.removeRole(vb);
+				user.send("You have been removed from the VB role.");
+			break;
+			case '🇼':
+				member.removeRole(webdev);
+				user.send("You have been removed from the WebDev role.");
+			break;
+		}
+	}
 });
 
 
@@ -134,7 +233,6 @@ client.on('message', function(message){
 					break;
 					//!nrPoll
 					case 'poll':
-						message.delete();
 						var uname = message.author.username;
 						if (cmd2 == null) { //no poll question
 							message.channel.send("Poll formulated incorrectly, please read the help (!nrHelp)");
@@ -145,6 +243,7 @@ client.on('message', function(message){
 							}	else {
 									var len = msg.length -10  //subtract the command and the quotes from the message length
 									var question = msg.substr(9,len) //pull just the question with no quotes.
+									message.delete();
 								poll(message.channel, uname, question)
 							}
 					break;
@@ -214,88 +313,53 @@ function timestamp(){
 }
 
 //Functions available to all users
-//Server Rules called with !rules
+//Server Rules called with !nrRules
 function rules(channel){
-	const embed = {
-		"description": "We're a new community with a wide range of categories!  Programming, Batch, Hardware, Software, Music, Gaming, Hacking and General text and voice channels.",
-		"url": "https://discordapp.com",
-		"color": embedColor,
-		"thumbnail": {
-		  "url": NRicon
-		},
-		"author": {
-		  "name": "Welcome to Nerd Revolt!",
-		  "icon_url": NRicon
-		},
-		"fields": [
-		  {
-			"name": "Server Rules",
-			"value": "Violation of any of these rules can lead to a ban of the user!\n\n \
-			1:  Members are not allowed to engage in threatening behavior toward other members. This includes flaming. \n\
-			2:  Don't try to cause harm to member and public, this includes attempt to infect members with any kind of malware infection. \n\
-			3:  Don't be a diiiiiiiiiiiiiick \n\
-			4:  Please try to be a mature person even if your age is under 16 years old. \n\
-			5:  There will be no racial, ethnic, gender based insults or any other personal discrimination.  This will not be tolerated and can lead to immediate suspension. \n\
-			6:  Posting of malicious software results in immediate ban \n\
-			7:  This is not a place for politico-religious arguments, don't outside of #calm-people-discuss-things-politely-in-here. \n\
-			8:  Keep to English language in the code rooms and #general-but-icky-is-the-best \n\
-			9:  Be polite and thoughtful debate on potentially controversial topics.\n"
-		  },
-		  { //character limit of a field is 1024...
-			"name": "10: Be kind to others.  How hard is it to not be an asshole?", //might as well highlight this rule
-			"value": "11: No advertising of ddos, stress testing, or booter services. \n\
-			12: Do not post personal information that isn't yours. \n\
-			13: Nicknames can only be altered by @Admin s, make your requests to them for sensible name changes. \n\
-			14: You may have your username changed to something more human-typable if it's made of lots of non-keyboard symbols that stop people from properly @-ing you."
-		  }
-		]
-	  };
-	  channel.send({ embed });
+	let rulesEmbed = new Discord.RichEmbed()
+		.setTitle("__**Welcome to Nerd Revolt!**__\n\We're a new community with a wide range of categories!  Programming, Batch, Hardware, Software, Music, Gaming, Hacking and General text and voice channels.\n\n\n\Violations of any of these rules can lead to a ban of the user!")
+		.setColor(embedColor)
+		.setThumbnail(NRicon)
+		.setDescription("1:  Members are not allowed to engage in threatening behavior toward other members. This includes flaming. \n\
+		2:  Don't try to cause harm to member and public, this includes attempt to infect members with any kind of malware infection. \n\
+		3:  Don't be a diiiiiiiiiiiiiick \n\
+		4:  Please try to be a mature person even if your age is under 16 years old. \n\
+		5:  There will be no racial, ethnic, gender based insults or any other personal discrimination.  This will not be tolerated and can lead to immediate suspension. \n\
+		6:  Posting of malicious software results in immediate ban \n\
+		7:  This is not a place for politico-religious arguments, don't outside of #calm-people-discuss-things-politely-in-here. \n\
+		8:  Keep to English language in the code rooms and #general-but-icky-is-the-best \n\
+		9:  Be polite and thoughtful debate on potentially controversial topics.\n\
+		10: Be kind to others.  How hard is it to not be an asshole?\n\
+		11: No advertising of ddos, stress testing, or booter services. \n\
+		12: Do not post personal information that isn't yours. \n\
+		13: Nicknames can only be altered by @Admin s, make your requests to them for sensible name changes. \n\
+		14: You may have your username changed to something more human-typable if it's made of lots of non-keyboard symbols that stop people from properly @-ing you.")
+
+		channel.send(rulesEmbed);
 }
 
 function help(channel){
-		const embed = {
-			"description": "This bot is currently hard coded to accept new members and give them the 'New Users' role, upon accepting the rules (:thumbsup:), new users are granted the member role.",
-			"color": embedColor,
-			"thumbnail": {
-			  "url": NRicon
-			},
-			"author": {    
-			  "name": "Nerdbot Help",
-			  "icon_url": NRicon
-			},
-			"fields": [
-			  {
-				"name": "\u200b",
-				"value": "\u200b"
-			  },
-			  {
-				"name": "Nerdbot commands", 
-				"value": "__**!nrRules**__: Display the rules.\n\
-				__**!nrHello**__: Say hello!\n\
-				__**!nrJoke**__: Dad jokes!\n\
-				__**!nrMath**__: Math Gifs.  Optional arguments: options, 1-21\n\
-				__**!nrPoll \"question\"**__: To create a poll, enter the !nrpoll command followed by your question in quotes\n\
-				(ex. !nrPoll \"This is the correct format\")\n\
-				__**!nrStat**__: Display server statistics.\n\
-				__**!nrStat @mention**__: Display the mentioned user statistics.\n\
-				__**!nrSource**__: Displays a link to the source of this bot.\n\
-				__**!nrTime**__: Display the current date and time.\n\n"
-			  },
-			  {
-				"name": "\u200b",
-				"value": "\u200b"
-			  },
-			  {
-				"name": "Staff commands",
-				"value":"__**!nrDelete**__ [number to delete]: Deletes requested number of posts from current channel (Staff Only)\n\
-				__**!nrDiscussion**__: Generates a discussion question from 163 possible choices\n\
-				__**!nrParrot \"statement\"**__ \"Statement for bot to say\": Make the bot say what you say in quotes following the command \n\n\
-				**To request more commands, just DM b00st3d**"
-			  }
-			]
-		  };
-		  channel.send({ embed });
+	let helpEmbed = new Discord.RichEmbed()
+	.setTitle("__**Nerdbot Help**__\n\n\n**Nerdbot commands**")
+	.setColor(embedColor)
+	.setThumbnail(NRicon)
+	//.addBlankField()
+	.addField("!nrRules", "Display the rules.")
+	.addField("!nrJoke", "Dad jokes!")
+	.addField("!nrMath", "Math Gifs. Optional arguments: options 1-21")
+	.addField("!nrPoll \"Question\"", "To create a poll, enter the !nrpoll command followed by your question in quotes\
+	(ex. !nrPoll \"This is the correct format\")")
+	.addField("!nrStat", "Display server statistics")
+	.addField("!nrStat @mention", "Display the mentioned user statistics")
+	.addField("!nrSource", "Displays a link to the source of this bot")
+	.addBlankField()
+	.addField("**Staff Commands**", "\u200b")
+	.addField("!nrDelete [number to delete]", "Deletes requested number of posts from the current channel")
+	.addField("!nrDiscussion", "Generates a discussion question from 163 possible choices")
+	.addField("!nrParrot \"statement\"", "Make the bot say what you say in the quotes following the command")
+	.addBlankField()
+	.setFooter("To request more commands, just DM b00st3d")
+
+	channel.send(helpEmbed);
 }
 
 function ping(channel){
@@ -383,28 +447,17 @@ function joke(channel){
 }
 
 function displaySrc(channel){
-	const embed = {
-		"description": "The NerdBot is open source and will probably stay that way unless it becomes super popular...",
-		"color": embedColor,
-		"thumbnail": {
-		  "url": NRicon
-		},
-		"author": {    
-		  "name": "NerdBot Source",
-		  "icon_url": NRicon
-		},
-		"fields": [
-		  {
-			"name": "\u200b",
-			"value": "\u200b"
-		  },
-		  {
-			"name": "Click here for the NerdBot source", 
-			"value": "[NerdBot GitHub Link](https://github.com/b00st3d/NerdBot)\n\nIf you have any suggestions or feature requests, please DM 'b00st3d"
-		  }
-		]
-	  };
-	  channel.send({ embed });
+	let sourceEmbed = new Discord.RichEmbed()
+		.setTitle("__**Nerdbot Source**__")
+		.setDescription("The NerdBot is open source and will probably stay that way unless it becomes super popular...")
+		.setColor(embedColor)
+		.setThumbnail(NRicon)
+		.addBlankField()
+		.addField("**Click here for the NerdBot Source**", "[NerdBot GitHub Link](https://github.com/b00st3d/NerdBot)")
+		.addBlankField()
+		.setFooter("If you have any suggestions or feature requests, please DM b00st3d")
+
+		channel.send(sourceEmbed);
 }
 function mathGif(message, choice){
 	var channel = message.channel;
@@ -460,6 +513,26 @@ function userStats(message, u){
 			lastmsg = "Never"
 		} else lastmsg = user.lastMessage.createdAt.toDateString();
 		//console.log(lastmsg);
+		var start = user.joinedAt;
+		var curTime = Date.now();
+		var dif = ((curTime - start)/3600000); //this is all that matters for calculating 24 hours but I want to make it display nicely.
+		var hour = Math.floor(dif);
+		var min = Math.floor((dif - hour)*60);
+		if (hour > 24){
+			var day = Math.floor(hour/24)
+			var hour = hour % 24 //remainder of hours
+		} else day = 0
+		var dayVal, hourVal, minVal;
+		if (day == 1){
+			dayVal = "day";
+		} else dayVal = "days";
+		if (hour == 1){
+			hourVal = "hour";
+		} else hourVal = "hours";
+		if (min == 1){
+			minVal = "min";
+		} else minVal = "mins";
+		var timeOutput = day + " " + dayVal + ", " + hour + " " + hourVal + ", " + min + " " + minVal
 
 		let memberEmbed = new Discord.RichEmbed()
 		.setColor(embedColor)
@@ -467,7 +540,8 @@ function userStats(message, u){
 		.addField("__**Member Information**__", "\u200b")
 		.addField("Name", user)
 		.addField("ID", user.id)
-		.addField("Joined at", user.joinedAt)
+		.addField("Joined date", user.joinedAt)
+		.addField("Time since Join", timeOutput)
 		//.addField("Last message", lastmsg)
 
 		message.channel.send(memberEmbed);
