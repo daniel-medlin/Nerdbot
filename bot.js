@@ -27,6 +27,7 @@ const embedColor = 4194099; //color code for embeds.
 client.on('error', console.error); //display client errors without crashing
 client.on('ready', () => {
 	console.log('Logged in as '+client.user.tag+'!');
+	checkUsers();
 });
 client.on('ready', () => {
 	client.user.setActivity('!nrHelp || NerdRevolt', { type: 'WATCHING' }) //Watching nr!Help || NerdRevolt
@@ -39,7 +40,13 @@ client.on('guildMemberAdd', (member) => { //add newly joined members to the new 
 	member.addRole(roleNewUser)    //id for "New User' role on server
 	
 		.then(console.log(member.user.username+" has joined "+ member.guild.name + " with the New User role! - " + timestamp()))
+		.then(storeNewUser(member.user.id, member.user.username))
 		.catch(console.error);
+});
+
+
+client.on('guildMemberRemove', (member) => { //actions on member leaving guild
+	deleteUser(member.id);
 });
 
 client.on('raw', event => {  //gets around the cached message issue of adding a role on reaction by fetching the message.
@@ -115,6 +122,8 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 				member.addRole(roleMember); //Add Members role
 				member.removeRole(roleNewUser);//remove new User role
 				console.log(member.user.username + " has been added to the Members role. - "+ timestamp());
+				deleteUser(user.id);
+
 			}
 		} else {
 			console.log("Wrong Reaction!");
@@ -193,6 +202,77 @@ client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members
 		}
 	}
 });
+
+
+
+function storeNewUser(uid, uname){ //Write users to .json
+	let thisUserData = {uid: uid, uname: uname, joined: new Date()};
+	let jsonStr = fs.readFileSync("userdata.json"); //read in the json data
+	let obj = JSON.parse(jsonStr); //parsed the json string for reading.
+	let users = obj.users;
+	let found = false;
+
+	for (let i=0;i<users.length;i++){
+		if (uid == users[i].uid){
+			found = true;
+		}
+	}
+	if (!found){
+		obj['users'].push(thisUserData); //adds new users to the users object in obj
+		jsonStr = JSON.stringify(obj); //converts my json string back to the correct format for writing.
+		fs.writeFileSync('userdata.json',jsonStr, function(err) {
+			if (err) {
+				console.log(err);
+			}
+		}); //write the new json file
+	}
+}
+
+function deleteUser(uid){ //remove users from .json
+	let jsonData = fs.readFileSync("userdata.json")
+	let users = JSON.parse(jsonData).users;
+	
+	for (let i=0;i<users.length;i++){
+		if (uid == users[i].uid){
+			users.splice(i,1);
+			jsonData = JSON.stringify({"users":users});
+			fs.writeFileSync("userdata.json", jsonData, function(err) {
+				if (err) {
+					console.log(err);
+				}
+			});
+		}
+	}
+
+}
+
+function checkUsers(){ //hourly, check members of the new users group.  Compare that list of users to the users we have in the .json file.  Anyone older than 24 hours kick
+	setInterval(function(){
+		console.log("Checking for expired users - " + timestamp());
+		let now = new Date();
+		var jsonData = fs.readFileSync("userdata.json")
+		var users = JSON.parse(jsonData).users;
+		let roleMember = client.guilds.get(gid).roles.get(roleNewUser).members.map(m=>m.user.id); //lists members in the role
+
+		for (let a=0;a<roleMember.length;a++){ //loop through members of the new user role
+			for (let i=0;i<users.length;i++){ //loop through members of the .json file
+				var uid = users[i].uid;
+				var name = users[i].uname;
+				var join = new Date(users[i].joined);
+				if (uid == roleMember[a]){
+					let diffDay = (Math.abs(now.getTime()-join.getTime()))/(1000 * 60 * 60 * 24); //Calculate the difference in days. if >= 1 then kick.
+					//let diffMin = (Math.abs(now.getTime()-join.getTime()))/(1000 * 60); //Calculate the difference in min.  useful for testing.
+					if (diffDay >= 1){
+						
+						client.guilds.get(gid).members.get(uid).kick("Failed to accept rules within 24 hours of joining");
+						console.log(name + " has been kicked for inactivity - " + timestamp());
+						deleteUser(uid);
+					}
+				} //No user match
+			}
+		}
+	}, 1000*60*60);//run every hour
+}
 
 
 //COMMANDS
@@ -284,23 +364,14 @@ client.on('message', function(message){
 					//!nrDelete [1] allow admin to delete multiple messages
 					case 'delete':
 						if(!isNaN(cmd2)){ //only run command if cmd2 is a number
-							del(message, cmd2)
+							del(message, parseInt(cmd2)+1);
 						}				
 					break;
 					//!nrParrot repeat the phrase as if coming from bot
 					case 'parrot':
 						parrot(message.channel, message);
 					break;
-					//discussion questions
-					case 'discussion':
-						message.delete();
-						discussion(message.channel, message);
-					break;
-					
-					
 				}
-				
-				
 		}
 });
 
@@ -354,7 +425,6 @@ function help(channel){
 	.addBlankField()
 	.addField("**Staff Commands**", "\u200b")
 	.addField("!nrDelete [number to delete]", "Deletes requested number of posts from the current channel")
-	.addField("!nrDiscussion", "Generates a discussion question from 163 possible choices")
 	.addField("!nrParrot \"statement\"", "Make the bot say what you say in the quotes following the command")
 	.addBlankField()
 	.setFooter("To request more commands, just DM b00st3d")
@@ -499,7 +569,8 @@ function serverStats(channel){
 		.setThumbnail(NRicon)
 		.addField("\u200b", "\u200b")
 		.addField("NerdRevolt Launch Date", createdString)
-		.addField("Number of users", userStat)
+		.addBlankField()
+		.addField("User count", userStat)
 	channel.send(ServerEmbed);
 }
 
@@ -557,9 +628,11 @@ function userStats(message, u){
 function del(message, number){
 	var uname = message.author.username;
 	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
+		if (number > 0 && number < 100){
 		message.channel.bulkDelete(number)
-			.then(message.channel.send(number + " messages deleted by " + uname))
+			.then(console.log((number-1) + " messages deleted by " + uname))
 			.catch(console.error);
+		} else message.channel.send("number to delete must be greater than 0 and less than 100.");
 	} else {
 		message.channel.send(message.author.username + " has attempted to delete " + number + " messages.\nOnly Administrators or Moderators can delete messages!  This has been flagged for review by <@&444250817680375809>"); //Publicly shame the offender and tag moderators
 		console.log("WARNING!!!! - " + message.author.username + " has attempted to delete " + number + " messages from the " + message.channel.name + " channel.");
@@ -584,18 +657,8 @@ function parrot(channel, message){
 	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
 		message.delete();
 		console.log(message.author.username + " has sent the following parrot message: \"" + myMsg[1] + "\""); //log who sent what message to console just in case.
-
-
-		
-		//HOLY FUCKING GODDAMN SHIT YOU NEEED TO CHECK THIS OUT BECAUSE IT'S THROWING WIERD WARNINGS THAT I'M TOO DRUNK TO FIGURE OUT!!!!
 		channel.send(myMsg[1]);
 
 	}else ("Only staff can run this command.");
 }
-
-
-
-
-
-
 client.login(auth.token);
