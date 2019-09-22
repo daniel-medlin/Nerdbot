@@ -628,7 +628,7 @@ function userStats(message, u){
 function del(message, number){
 	var uname = message.author.username;
 	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
-		if (number > 0 && number < 100){
+		if (number > 1 && number < 101){
 		message.channel.bulkDelete(number)
 			.then(console.log((number-1) + " messages deleted by " + uname))
 			.catch(console.error);
