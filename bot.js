@@ -10,6 +10,7 @@ const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
 const ruleMSG = "587817645416644621"; //ID of the rules post
 const langMSG = "619323243077173278"; //ID of the language post
+const generalChat = "444186550197288972"; //ID of General Chat Channel
 
 //language role IDs
 const batch = "619314081068875792";
@@ -241,6 +242,7 @@ function deleteUser(uid){ //remove users from .json
 					console.log(err);
 				}
 			});
+			client.channels.get(generalChat).send("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!");
 		}
 	}
 
