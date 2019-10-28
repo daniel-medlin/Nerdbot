@@ -242,7 +242,15 @@ function deleteUser(uid){ //remove users from .json
 					console.log(err);
 				}
 			});
-			client.channels.get(generalChat).send("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!");
+			//client.channels.get(generalChat).send("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!");
+
+			let welcomeEmbed = new Discord.RichEmbed()
+				.setTitle("__**Welcome to Nerd Revolt!**__")
+				.setColor(embedColor)
+				.setThumbnail(NRicon)
+				.setDescription("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!\n\n\
+				Be sure to check out the <#619317154080227348> channel to select your prefered programming lanugage.")
+				client.channels.get(generalChat).send(welcomeEmbed);
 		}
 	}
 
