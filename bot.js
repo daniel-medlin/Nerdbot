@@ -1,16 +1,18 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const RichEmbed = require('discord.js');
+//const RichEmbed = require('discord.js');
 const auth = require('./auth.json');
 const fs = require('fs');
 const mg = require('./mathgifs');
+const rMod = require('./roleMod.js');
 
-const gid = "444186550197288970"; //ID of the guild
+const gid = "587298481807294500"; //ID of the guild
 const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
 const ruleMSG = "587817645416644621"; //ID of the rules post
 const langMSG = "619323243077173278"; //ID of the language post
-const generalChat = "444186550197288972"; //ID of General Chat Channel
+const osMSG = "663852075343675421"; //ID of the OS post
+const welcomeChan = "646926674159468557"; //ID of Welcome Channel Channel
 
 //language role IDs
 const batch = "619314081068875792";
@@ -20,6 +22,17 @@ const python = "619314356039188480";
 const vb = "619314378637967371";
 const webdev = "619314416466264075";
 
+//OS Roles ID
+const windowsOS = "663845613426835456";
+const linuxOS = "663845696457146391";
+const appleOS = "663845749293056021";
+const androidOS = "663845790527127555";
+
+//OS react ID
+const windowsReact = "663817236993146885";
+const linuxReact = "663817216214695947";
+const appleReact = "663817567827263508";
+const androidReact = "663817195519868968";
 
 
 const NRicon = "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png";  //Nerd Revolt Icon for embeds.
@@ -82,6 +95,20 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 				})
 				.catch(err => console.log(err));
 			}
+		} else if(event.d.message_id === osMSG){ //message ID for os post
+			var reactionChannel = client.channels.get(event.d.channel_id);
+			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
+				return; //already cached
+			else {
+				reactionChannel.fetchMessage(event.d.message_id)
+				.then(msg => {
+						//console.log(msg);
+						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
+						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
+						client.emit('messageReactionAdd', msgReaction, user);
+				})
+				.catch(err => console.log(err));
+			}
 		}
 	}
 	else if(eventName === 'MESSAGE_REACTION_REMOVE'){ //if reaction removed...
@@ -99,6 +126,19 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 				.catch(err => console.log(err));
 			}
 		} else if(event.d.message_id === langMSG){  //message ID for language post
+			var reactionChannel = client.channels.get(event.d.channel_id);
+			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
+				return; //already cached
+			else {
+				reactionChannel.fetchMessage(event.d.message_id)
+				.then(msg => {
+						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
+						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
+						client.emit('messageReactionRemove', msgReaction, user);
+				})
+				.catch(err => console.log(err));
+			}
+		} else if(event.d.message_id === osMSG){  //message ID for language post
 			var reactionChannel = client.channels.get(event.d.channel_id);
 			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
 				return; //already cached
@@ -160,6 +200,28 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 			default:
 				messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
 		}
+	} else if (messageReaction.message.id === osMSG){ //reactions on OS message
+		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
+		switch(messageReaction.emoji.id){
+			case windowsReact:
+				member.addRole(windowsOS);
+				user.send("You have been added to the Windows role.");
+			break;
+			case linuxReact:
+				member.addRole(linuxOS);
+				user.send("You have been added to the Linux role.");
+			break;
+			case appleReact:
+				member.addRole(appleOS);
+				user.send("You have been added to the Apple role.");
+			break;
+			case androidReact:
+				member.addRole(androidOS);
+				user.send("You have been added to the Android role.");
+			break;
+			//default:
+				//messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
+		}
 	}
 });
 
@@ -201,10 +263,28 @@ client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members
 				user.send("You have been removed from the WebDev role.");
 			break;
 		}
+	} else if (messageReaction.message.id === osMSG){
+		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
+		switch(messageReaction.emoji.id){
+			case windowsReact:
+				member.removeRole(windowsOS);
+				user.send("You have been removed from the Windows role.");
+			break;
+			case linuxReact:
+				member.removeRole(linuxOS);
+				user.send("You have been removed from the Linux role.");
+			break;
+			case appleReact:
+				member.removeRole(appleOS);
+				user.send("You have been removed from the Apple role.");
+			break;
+			case androidReact:
+				member.removeRole(androidOS);
+				user.send("You have been removed from the Android role.");
+			break;
+		}
 	}
 });
-
-
 
 function storeNewUser(uid, uname){ //Write users to .json
 	let thisUserData = {uid: uid, uname: uname, joined: new Date()};
@@ -242,7 +322,7 @@ function deleteUser(uid){ //remove users from .json
 					console.log(err);
 				}
 			});
-			//client.channels.get(generalChat).send("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!");
+			//client.channels.get(welcomeChan).send("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!");
 
 			let welcomeEmbed = new Discord.RichEmbed()
 				.setTitle("__**Welcome to Nerd Revolt!**__")
@@ -250,7 +330,7 @@ function deleteUser(uid){ //remove users from .json
 				.setThumbnail(NRicon)
 				.setDescription("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!\n\n\
 				Be sure to check out the <#619317154080227348> channel to select your prefered programming lanugage.")
-				client.channels.get(generalChat).send(welcomeEmbed);
+				setTimeout(function(){ client.channels.get(welcomeChan).send(welcomeEmbed); }, 2000);
 		}
 	}
 
@@ -355,10 +435,16 @@ client.on('message', function(message){
 						if (cmd2 == null){
 							mathGif(message, 0);
 						} else if (cmd2 === "options" || !isNaN(cmd2)){
-							mathGif2(message, cmd2);
+							mathGif(message, cmd2);
 						} else message.channel.send("Invalid argument");
 					break;
 					//I'm the humblest
+					case 'role':
+						if (cmd2 == null){
+							rMod.editRoles(message, 'noSelect');
+						} else rMod.editRoles(message, cmd2);
+						message.delete();
+					break;
 					case 'humble':
 						message.channel.send("<@"+uid+"> be praised!");
 						message.delete();
@@ -381,12 +467,25 @@ client.on('message', function(message){
 					case 'parrot':
 						parrot(message.channel, message);
 					break;
+					case 'test':
+						test();
+					break;
 				}
 		}
 });
 
 
 //Shhh the functions are sleeping down here.
+
+function test(){
+	let msg = client.guilds.get(gid).channels.get("619317154080227348").messages.get(osMSG);
+	msg.react(windowsReact)
+		.then(() => msg.react(linuxReact))
+		.then(() => msg.react(appleReact))
+		.then(() => msg.react(androidReact))
+		.catch(() => console.error('One of the emojis failed to react.'));
+
+}
 
 
 function timestamp(){
@@ -413,7 +512,8 @@ function rules(channel){
 		11: No advertising of ddos, stress testing, or booter services. \n\
 		12: Do not post personal information that isn't yours. \n\
 		13: Nicknames can only be altered by @Admin s, make your requests to them for sensible name changes. \n\
-		14: You may have your username changed to something more human-typable if it's made of lots of non-keyboard symbols that stop people from properly @-ing you.")
+		14: You may have your username changed to something more human-typable if it's made of lots of non-keyboard symbols that stop people from properly @-ing you. \n\
+		15: When posting code for interpreted languages (batch, shellscipt, etc.), put it in code tags or upload as a text document to prevent accidental execution.")
 
 		channel.send(rulesEmbed);
 }
@@ -432,6 +532,7 @@ function help(channel){
 	.addField("!nrStat", "Display server statistics")
 	.addField("!nrStat @mention", "Display the mentioned user statistics")
 	.addField("!nrSource", "Displays a link to the source of this bot")
+	.addField("!nrRole", "Add or remove yourself from various roles.  !nrRole without an argument lists roles.  !nrRole [Rolename] adds/removes you from the roll selected.")
 	.addBlankField()
 	.addField("**Staff Commands**", "\u200b")
 	.addField("!nrDelete [number to delete]", "Deletes requested number of posts from the current channel")
@@ -545,7 +646,7 @@ function mathGif(message, choice){
 	const collector = channel.createMessageCollector(filter, { time: 10000 }); //listen for a response
 	if (choice < 1 || choice > 21 || choice === "options"){ //if choice is outside the range of possible
 		mg.options(channel);//display options
-		console.log(collector); //TESTING
+		//console.log(collector); //TESTING
 
 		collector.on('collect', response => {
 			if (parseInt(response) > 0 && parseInt(response) < 22){//if response is between 1 and 21, get gif
@@ -560,6 +661,8 @@ function mathGif(message, choice){
 			}
 		});
 		collector.on('end', collected => console.log('Collected '+ collected.size+ ' items'));
+	} else {
+		channel.send(mg.selection(parseInt(choice)))
 	}
 }
 
