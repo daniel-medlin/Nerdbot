@@ -60,7 +60,7 @@ function displayOptions(channel, message){
   .addField("\u200b", "Challenge, Windows, Linux,")
   .addField("\u200b", "Apple, Android")
   channel.send(OptionsEmbed).then(sent => {
-    sent.delete(60000); //Send the embed then delete it after 10 seconds.
+    sent.delete(60000).catch(e => console.log(e)); //Send the embed then delete it after 60 seconds.
   });
 }
 
@@ -93,13 +93,13 @@ function executeRoleChange(channel, message, role){
     member.removeRole(newRole);
     //remove role from user
     channel.send("User removed from role: **" + userRole +"**").then(sent => {
-      sent.delete(5000);
+      sent.delete(5000).catch(e => console.log(e));
     });
   } else {
     member.addRole(newRole)
     //add role to user
     channel.send("User added to role: **" + userRole+"**").then(sent => {
-      sent.delete(5000);
+      sent.delete(5000).catch(e => console.log(e));
     });
   }
 }

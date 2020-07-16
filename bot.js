@@ -5,14 +5,16 @@ const auth = require('./auth.json');
 const fs = require('fs');
 const mg = require('./mathgifs');
 const rMod = require('./roleMod.js');
+const rPromote = require('./promote.js');
 
-const gid = "587298481807294500"; //ID of the guild
+const gid = "444186550197288970"; //ID of the guild
 const roleNewUser = "587787978491953159"; //ID of new member role
 const roleMember = "587787582583078923"; //ID of member role
 const ruleMSG = "587817645416644621"; //ID of the rules post
 const langMSG = "619323243077173278"; //ID of the language post
 const osMSG = "663852075343675421"; //ID of the OS post
 const welcomeChan = "646926674159468557"; //ID of Welcome Channel Channel
+const sBox = "718261894359679017"; //ID for Suggestion Box Channel
 
 //language role IDs
 const batch = "619314081068875792";
@@ -322,14 +324,13 @@ function deleteUser(uid){ //remove users from .json
 					console.log(err);
 				}
 			});
-			//client.channels.get(welcomeChan).send("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!");
 
 			let welcomeEmbed = new Discord.RichEmbed()
 				.setTitle("__**Welcome to Nerd Revolt!**__")
 				.setColor(embedColor)
 				.setThumbnail(NRicon)
 				.setDescription("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!\n\n\
-				Be sure to check out the <#619317154080227348> channel to select your prefered programming lanugage.")
+				Be sure to check out the <#619317154080227348> channel to select your prefered programming lanugages.  \nYou can also select your roles manually using the !nrRole command.")
 				setTimeout(function(){ client.channels.get(welcomeChan).send(welcomeEmbed); }, 2000);
 		}
 	}
@@ -455,6 +456,14 @@ client.on('message', function(message){
 						serverStats(message.channel);
 						} else userStats(message, cmd2);
 					break;
+					case 'suggest':
+						message.delete();
+						if (cmd2 == null){
+							message.channel.send("No suggestion detected.  Please try again.  Usage: !nrSuggest Your suggestion here").then(sent => {
+								sent.delete(10000);
+							  });
+						} else suggestion(message.channel, uname, msg.substring(11, msg.length))
+					break;
 
 					//ADMIN COMMANDS BELOW HERE
 					//!nrDelete [1] allow admin to delete multiple messages
@@ -467,8 +476,24 @@ client.on('message', function(message){
 					case 'parrot':
 						parrot(message.channel, message);
 					break;
+					case 'promote':
+						if (cmd2 == null){
+							rPromote.display(message.channel);
+						} else if (cmd2.substring(0,2) != "<@"){
+							rPromote.display(message.channel);
+							message.channel.send("**Invalid Argument.  Correct usage: !nrPromote <@username> [role]**").then(sent => {
+								sent.delete(20000).catch(e => console.log(e));
+							  });
+						} else {
+							role = args[2]
+							promote(message, uname, cmd2, role)
+						}
+						message.delete();
+					break;
 					case 'test':
-						test();
+						message.delete();
+
+						test(message, cmd2)
 					break;
 				}
 		}
@@ -477,14 +502,14 @@ client.on('message', function(message){
 
 //Shhh the functions are sleeping down here.
 
-function test(){
-	let msg = client.guilds.get(gid).channels.get("619317154080227348").messages.get(osMSG);
-	msg.react(windowsReact)
-		.then(() => msg.react(linuxReact))
-		.then(() => msg.react(appleReact))
-		.then(() => msg.react(androidReact))
-		.catch(() => console.error('One of the emojis failed to react.'));
-
+function test(message, postID){
+	if (postID != null){
+		if (postID.length == 18){
+			if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) {
+				require('./massKick.js').massKick(message, postID, client, gid)		
+			} //else do nothing I don't want test to respond to anyone.
+		}	
+	}
 }
 
 
@@ -533,10 +558,12 @@ function help(channel){
 	.addField("!nrStat @mention", "Display the mentioned user statistics")
 	.addField("!nrSource", "Displays a link to the source of this bot")
 	.addField("!nrRole", "Add or remove yourself from various roles.  !nrRole without an argument lists roles.  !nrRole [Rolename] adds/removes you from the roll selected.")
+	.addField("!nrSuggest <Your suggestion here>", "Drop a suggestion in the suggestion box.  Quotes not needed around suggestion text")
 	.addBlankField()
 	.addField("**Staff Commands**", "\u200b")
 	.addField("!nrDelete [number to delete]", "Deletes requested number of posts from the current channel")
 	.addField("!nrParrot \"statement\"", "Make the bot say what you say in the quotes following the command")
+	.addField("!nrPromote <@username> [role]", "Add/Remove tagged user from the role.  use !nrPromote to see valid roles")
 	.addBlankField()
 	.setFooter("To request more commands, just DM b00st3d")
 
@@ -671,11 +698,14 @@ function serverStats(channel){
 	let d = guild.createdAt.toDateString();
 	let numUsers = guild.memberCount;
 	let online = guild.members.filter(m => m.presence.status === 'online').size;
+	let chanCount = guild.channels.size;
+	let catCount = guild.channels.filter(chan => chan.type === "category").size;
+	let roleCount = guild.roles.size - 1; //don't count @everyone
 
 	let createdString = "This server was started on " + d;
+	let channelStat = "There are " + chanCount + " channels in " + catCount + " categories.";
 	let userStat = "Number of online users: " + online + "/" + numUsers;
-	console.log(createdString);
-	console.log(userStat);
+	let roles = "Total number of roles: " + roleCount;
 	let ServerEmbed = new Discord.RichEmbed()
 		.setDescription("__**NerdRevolt Stats**__")
 		.setColor(embedColor)
@@ -684,6 +714,8 @@ function serverStats(channel){
 		.addField("NerdRevolt Launch Date", createdString)
 		.addBlankField()
 		.addField("User count", userStat)
+		.addField("Roles", roles)
+		.addField("Channels", channelStat)
 	channel.send(ServerEmbed);
 }
 
@@ -735,6 +767,19 @@ function userStats(message, u){
 	};
 }
 
+function suggestion(channel, user, suggestion){
+	try{
+		client.channels.get(sBox).send("Suggestion from: " + user + "\n>>> " + suggestion)
+		channel.send("Your suggestion has been logged and will be reviewed by staff:\n\nSuggestion from: " + user + "\n>>> " + suggestion).then(sent => {
+			sent.delete(10000);
+		  });
+	} catch(err) {
+		channel.send("Suggestion not logged for the following reason: " + err.message + "\n\n\
+		This message will be displayed for 30 seconds. Please provide this error message to staff.").then(sent => {
+			sent.delete(30000);
+		  });
+	}
+}
 
 //ADMIN FUNCTIONS BELOW THIS LINE
 //delete user specified number of messages
@@ -752,19 +797,6 @@ function del(message, number){
 	}
 }
 
-function discussion(channel, message){
-	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
-	var discussion;
-	fs.readFile("./discussion.txt", "utf-8", (err, buf) => {
-		if (err){console.log(err)};
-		discussion = buf.split(";"); //end of line for each question
-		var j = Math.floor(Math.random() * discussion.length) //random select from discusssion questions
-		channel.send(discussion[j]);
-	});
-}
-else channel.send("Only staff can start this discussion");
-}
-
 function parrot(channel, message){
 	myMsg = message.content.split('"');
 	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from admin or mod...
@@ -773,5 +805,14 @@ function parrot(channel, message){
 		channel.send(myMsg[1]);
 
 	}else ("Only staff can run this command.");
+}
+
+function promote(message, user, target, role){
+	if (role == null) role = "noselect";
+	channel = message.channel;
+	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name ==="Moderator")) { //if message comes from an admin or mod...
+		rPromote.editRoles(message, target, role);
+	}
+
 }
 client.login(auth.token);
