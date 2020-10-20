@@ -6,6 +6,8 @@ const fs = require('fs');
 const mg = require('./mathgifs');
 const rMod = require('./roleMod.js');
 const rPromote = require('./promote.js');
+const userStat = require('./userStat.js');
+const mod = require('./Automod.js');
 
 const gid = "444186550197288970"; //ID of the guild
 const roleNewUser = "587787978491953159"; //ID of new member role
@@ -15,6 +17,7 @@ const langMSG = "619323243077173278"; //ID of the language post
 const osMSG = "663852075343675421"; //ID of the OS post
 const welcomeChan = "646926674159468557"; //ID of Welcome Channel Channel
 const sBox = "718261894359679017"; //ID for Suggestion Box Channel
+const logChan = "657746941295329300"; //ID of Logs channel
 
 //language role IDs
 const batch = "619314081068875792";
@@ -39,6 +42,10 @@ const androidReact = "663817195519868968";
 
 const NRicon = "https://cdn.discordapp.com/icons/444186550197288970/8069d47b360eb4dc237eaffd8f538879.png";  //Nerd Revolt Icon for embeds.
 const embedColor = 4194099; //color code for embeds.
+
+process.on('unhandledRejection', error => {
+    console.error('unhandledRejection', error.message);
+});
 
 client.on('error', console.error); //display client errors without crashing
 client.on('ready', () => {
@@ -454,7 +461,8 @@ client.on('message', function(message){
 					case 'stat':
 						if (cmd2 == null){
 						serverStats(message.channel);
-						} else userStats(message, cmd2);
+						} else userStats(message, msg.substring(8, msg.length));
+						message.delete();
 					break;
 					case 'suggest':
 						message.delete();
@@ -490,10 +498,20 @@ client.on('message', function(message){
 						}
 						message.delete();
 					break;
+					case 'warn':
+						autoMod("warn", message, cmd2, msg.substring(31, msg.length))
+					break;
+					case 'kick':
+						autoMod("kick", message, cmd2, msg.substring(31, msg.length))
+					break;
+					case 'ban':
+						autoMod("ban", message, cmd2, msg.substring(30, msg.length))
+					break;
+					case 'clear':
+						autoMod("delete",message, cmd2, msg.substring(9, msg.length))
+					break;
 					case 'test':
 						message.delete();
-
-						test(message, cmd2)
 					break;
 				}
 		}
@@ -555,7 +573,7 @@ function help(channel){
 	.addField("!nrPoll \"Question\"", "To create a poll, enter the !nrpoll command followed by your question in quotes\
 	(ex. !nrPoll \"This is the correct format\")")
 	.addField("!nrStat", "Display server statistics")
-	.addField("!nrStat @mention", "Display the mentioned user statistics")
+	.addField("!nrStat [@mention, username, or user id]", "Display the users statistics using either mention, display name, or ID")
 	.addField("!nrSource", "Displays a link to the source of this bot")
 	.addField("!nrRole", "Add or remove yourself from various roles.  !nrRole without an argument lists roles.  !nrRole [Rolename] adds/removes you from the roll selected.")
 	.addField("!nrSuggest <Your suggestion here>", "Drop a suggestion in the suggestion box.  Quotes not needed around suggestion text")
@@ -564,6 +582,10 @@ function help(channel){
 	.addField("!nrDelete [number to delete]", "Deletes requested number of posts from the current channel")
 	.addField("!nrParrot \"statement\"", "Make the bot say what you say in the quotes following the command")
 	.addField("!nrPromote <@username> [role]", "Add/Remove tagged user from the role.  use !nrPromote to see valid roles")
+	.addField("!nrWarn <@user> [reason]", "Warn a member, must mention the member with the reason optional.")
+	.addField("!nrKick <@user> [reason]", "Kick a member, must mention the member with the reason optional.")
+	.addField("!nrBan <@user> [reason]", "Ban a member, must mention the member with the reason optional.")
+	.addField("!nrClear <log ID>", "Clear log with provided ID")
 	.addBlankField()
 	.setFooter("To request more commands, just DM b00st3d")
 
@@ -663,7 +685,7 @@ function displaySrc(channel){
 		.addBlankField()
 		.addField("**Click here for the NerdBot Source**", "[NerdBot GitHub Link](https://github.com/b00st3d/NerdBot)")
 		.addBlankField()
-		.setFooter("If you have any suggestions or feature requests, please DM b00st3d")
+		.setFooter("If you have any suggestions or feature requests, Use !nrsuggest Your suggestion here")
 
 		channel.send(sourceEmbed);
 }
@@ -719,52 +741,12 @@ function serverStats(channel){
 	channel.send(ServerEmbed);
 }
 
-function userStats(message, u){
-	let channel = message.channel;
-	if (u.startsWith('<@') && u.endsWith('>')){ //if the second command is a mention we can get to work.
-		let user = message.guild.member(message.mentions.users.first()); 
-		let uIcon = user.user.displayAvatarURL; //user avatar
-		var lastmsg
-		if (user.lastMessage == null){
-			lastmsg = "Never"
-		} else lastmsg = user.lastMessage.createdAt.toDateString();
-		//console.log(lastmsg);
-		var start = user.joinedAt;
-		var curTime = Date.now();
-		var dif = ((curTime - start)/3600000); //this is all that matters for calculating 24 hours but I want to make it display nicely.
-		var hour = Math.floor(dif);
-		var min = Math.floor((dif - hour)*60);
-		if (hour > 24){
-			var day = Math.floor(hour/24)
-			var hour = hour % 24 //remainder of hours
-		} else day = 0
-		var dayVal, hourVal, minVal;
-		if (day == 1){
-			dayVal = "day";
-		} else dayVal = "days";
-		if (hour == 1){
-			hourVal = "hour";
-		} else hourVal = "hours";
-		if (min == 1){
-			minVal = "min";
-		} else minVal = "mins";
-		var timeOutput = day + " " + dayVal + ", " + hour + " " + hourVal + ", " + min + " " + minVal
-
-		let memberEmbed = new Discord.RichEmbed()
-		.setColor(embedColor)
-		.setThumbnail(uIcon)
-		.addField("__**Member Information**__", "\u200b")
-		.addField("Name", user)
-		.addField("ID", user.id)
-		.addField("Joined date", user.joinedAt)
-		.addField("Time since Join", timeOutput)
-		//.addField("Last message", lastmsg)
-
-		message.channel.send(memberEmbed);
-		
+function userStats(message, cmd2){
+	if (cmd2.startsWith('<@') && cmd2.endsWith('>')){ 
+		userStat.mention(message)
 	} else {
-		channel.send("Error: Either user doesn't exist or you failed to mention them.")
-	};
+		userStat.noMention(message, cmd2, gid, client);
+	}
 }
 
 function suggestion(channel, user, suggestion){
@@ -815,4 +797,60 @@ function promote(message, user, target, role){
 	}
 
 }
+
+function autoMod(type, message, userID, text){
+	if (text == "" || text == undefined){ //check/set text
+		text = "No Reason Provided"
+	}
+	if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) { //if message comes from staff
+		if (type == 'delete'){mod.delete(message,text);return;}
+		if (userID != undefined){ //check if a target was identified
+			if (userID.substring(0,3) == "<@!"){ //userID is a mention as expected.
+				userID = userID.substring(3,21)
+				var user = message.guild.members.get(userID)
+				var authorID = message.author.id
+		
+				if (user.roles.find(r => r.name === "Admin") || user.roles.find(r => r.name === "Moderator")){ //check if target is admin or mod.
+					message.channel.send("Hey! <@!" + authorID + "> You can't warn staff!").then(sent => {
+						sent.delete(5000);
+					});
+				} else { //Target isn't staff..valid target
+					switch(type){
+						case "warn": mod.warn(message, user, text);break;
+						case "kick": mod.kick(message, user, text);break;
+						case "ban" : mod.ban(message, user, text);break;
+						case "read": mod.read(message,userID);break;
+					}
+
+				}
+			} else {
+				message.channel.send("Invalid Synatax.  Correct Syntax: **!nrwarn/kick/ban <@username> [reason text]**").then(sent => {
+				sent.delete(10000).then(message.delete(12000));
+			});}
+		} else message.channel.send("Invalid Synatax.  Correct Syntax: **!nrwarn/kick/ban <@username> [reason text]**").then(sent => {
+			sent.delete(10000).then(message.delete(12000));
+		});
+		
+	} else {// Message not sent by staff
+		message.channel.send("This command is for staff use only!  This action has been logged.").then(sent => {
+			sent.delete(5000)
+			message.delete(7000);
+			if (userID != undefined){
+				if (userID.substring(0,3) == "<@!"){ //userID is a mention as expected.
+					userID = userID.substring(3,21)
+					client.channels.get(logChan).send(message.guild.members.get(message.author.id) + " attempted to " + type + " " + message.guild.members.get(userID) + " with the message **" + text + "**") //if they tried to warn someone
+				} else {
+					if (type == 'delete'){
+						if (text.length == 5 && !isNaN(text)){
+							mod.displayID(message,text)
+						} else client.channels.get(logChan).send(message.guild.members.get(message.author.id) + " attempted to clear log: " + text)
+						
+					} else client.channels.get(logChan).send(message.guild.members.get(message.author.id) + " attempted to use staff restricted command: " + type)
+				}
+			} else client.channels.get(logChan).send(message.author + " attempted to "+type+" a user with the message: **" + text + "**") //catch invalid syntax
+			
+		});
+	}
+}
+
 client.login(auth.token);
