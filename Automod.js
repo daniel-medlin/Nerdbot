@@ -76,7 +76,8 @@ exports.ban = function(message,user,text){ //BAN USER
                 var member = message.guild.member(user)
                 if(member){
                     user.send("You have been banned from NerdRevolt for the following reason: \n" + text)
-                    member
+                    .then(setTimeout(function(){
+                        member
                         .ban({
                             reason: text
                         })
@@ -92,6 +93,8 @@ exports.ban = function(message,user,text){ //BAN USER
                             message.channel.send(errOut)
                             console.log(err)
                         })
+                    }, 500))
+                    
                 }
             break;
             case "no":

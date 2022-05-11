@@ -55,17 +55,17 @@ function displayOptions(channel, message){
   OptionsEmbed
   .addBlankField()
   .addField("\u200b", "__**Available Roles**__")
-  .addField("\u200b", "Batch, C, Java")
-  .addField("\u200b", "Python, VB, WebDev")
-  .addField("\u200b", "Challenge, Windows, Linux,")
-  .addField("\u200b", "Apple, Android")
+  .addField("\u200b", "Batch, C, Go")
+  .addField("\u200b", "Java, Python, VB")
+  .addField("\u200b", "WebDev, Challenge, Windows")
+  .addField("\u200b", "Linux, Apple, Android")
   channel.send(OptionsEmbed).then(sent => {
     sent.delete(60000).catch(e => console.log(e)); //Send the embed then delete it after 60 seconds.
   });
 }
 
 function roleCheck(role){
-  const validRoles = ["batch", "c", "java", "python", "vb", "webdev", "challenge", "windows", "linux", "apple", "android"]
+  const validRoles = ["batch", "c", "go", "java", "python", "vb", "webdev", "challenge", "windows", "linux", "apple", "android"]
   if (validRoles.includes(role)){
     return true;
   } else return false;
@@ -78,6 +78,7 @@ function executeRoleChange(channel, message, role){
   switch(role){ 
     case 'batch': userRole = 'Batch';break;
     case 'c': userRole = 'C Language';break;
+    case 'go': userRole = 'Go';break;
     case 'java': userRole = 'Java';break;
     case 'python': userRole = 'Python';break;
     case 'vb': userRole = 'VB';break;

@@ -4,7 +4,10 @@ const embedColor = 4194099; //color code for embeds.
 const fs = require('fs')
 
 exports.mention = function(message){
+    console.log(message)
+    console.log(message.mentions.users.first())
     var user = message.guild.member(message.mentions.users.first());
+    console.log(user)
     stats(message, user);
 }
 exports.noMention = function(message, cmd2, gid, Client){

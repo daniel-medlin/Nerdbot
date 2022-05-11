@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-//const RichEmbed = require('discord.js');
+
 const auth = require('./auth.json');
 const fs = require('fs');
 const mg = require('./mathgifs');
@@ -15,17 +15,27 @@ const roleMember = "587787582583078923"; //ID of member role
 const ruleMSG = "587817645416644621"; //ID of the rules post
 const langMSG = "619323243077173278"; //ID of the language post
 const osMSG = "663852075343675421"; //ID of the OS post
+const genRoles = "962133843035439184"; //ID of the general roles post
 const welcomeChan = "646926674159468557"; //ID of Welcome Channel Channel
 const sBox = "718261894359679017"; //ID for Suggestion Box Channel
 const logChan = "657746941295329300"; //ID of Logs channel
+const langChan = "619317154080227348"; //ID of the language channel
 
 //language role IDs
 const batch = "619314081068875792";
 const cLang = "619314304759365633";
 const java = "619314332244770836";
+const go = "780594031305555979";
 const python = "619314356039188480";
 const vb = "619314378637967371";
 const webdev = "619314416466264075";
+const rust = "962149413583732737";
+const challenge = "711990793329705031";
+
+//Gen Role IDs
+const gaming = "962093267174965268";
+const tech = "962093145422712852";
+const music = "962018183634620467";
 
 //OS Roles ID
 const windowsOS = "663845613426835456";
@@ -53,20 +63,23 @@ client.on('ready', () => {
 	checkUsers();
 });
 client.on('ready', () => {
-	client.user.setActivity('!nrHelp || NerdRevolt', { type: 'WATCHING' }) //Watching nr!Help || NerdRevolt
+	client.user.setActivity('!nrHelp || NerdRevolt', { type: 'WATCHING' }) //Watching !nrHelp || NerdRevolt
   .then(presence => console.log(`Activity set to ${presence.game ? presence.game.name : 'none'}`))
   .catch(console.error);
-})
+});
 
-
-client.on('guildMemberAdd', (member) => { //add newly joined members to the new user role ewww hardcoded
+client.on('guildMemberAdd', (member) => { //add newly joined members to the new user role
 	member.addRole(roleNewUser)    //id for "New User' role on server
 	
 		.then(console.log(member.user.username+" has joined "+ member.guild.name + " with the New User role! - " + timestamp()))
 		.then(storeNewUser(member.user.id, member.user.username))
 		.catch(console.error);
+		console.log(member)
 });
 
+client.on("guildMemberAdd", (member) => {
+	console.log(member)
+})
 
 client.on('guildMemberRemove', (member) => { //actions on member leaving guild
 	deleteUser(member.id);
@@ -105,6 +118,20 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 				.catch(err => console.log(err));
 			}
 		} else if(event.d.message_id === osMSG){ //message ID for os post
+			var reactionChannel = client.channels.get(event.d.channel_id);
+			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
+				return; //already cached
+			else {
+				reactionChannel.fetchMessage(event.d.message_id)
+				.then(msg => {
+						//console.log(msg);
+						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
+						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
+						client.emit('messageReactionAdd', msgReaction, user);
+				})
+				.catch(err => console.log(err));
+			}
+		} else if(event.d.message_id === genRoles){ //message ID for General Roles post
 			var reactionChannel = client.channels.get(event.d.channel_id);
 			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
 				return; //already cached
@@ -160,9 +187,28 @@ client.on('raw', event => {  //gets around the cached message issue of adding a 
 				})
 				.catch(err => console.log(err));
 			}
+		} else if(event.d.message_id === genRoles){  //message ID for general roles post
+			var reactionChannel = client.channels.get(event.d.channel_id);
+			if(reactionChannel.messages.has(event.d.message_id)) //check if our message is already cached
+				return; //already cached
+			else {
+				reactionChannel.fetchMessage(event.d.message_id)
+				.then(msg => {
+						var msgReaction = msg.reactions.get(event.d.emoji.name); //get the reaction
+						var user = client.users.get(event.d.user_id);  //get user that reacted to the message
+						client.emit('messageReactionRemove', msgReaction, user);
+				})
+				.catch(err => console.log(err));
+			}
 		}
 	}
 });
+
+function output(outText, channelID){ //display text in language channel 
+	client.channels.get(channelID).send(outText).then(sent => {
+		sent.delete(2000)
+	});
+}
 
 client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to the Member role after reacting to the the rules.
 	if (messageReaction.message.id === ruleMSG){ //ensure we're reacting to the correct message
@@ -172,7 +218,7 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 				member.addRole(roleMember); //Add Members role
 				member.removeRole(roleNewUser);//remove new User role
 				console.log(member.user.username + " has been added to the Members role. - "+ timestamp());
-				deleteUser(user.id);
+				deleteUser(user.id, user.username);
 
 			}
 		} else {
@@ -184,27 +230,39 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 		switch(messageReaction.emoji.name){
 			case '🇧':
 				member.addRole(batch);
-				user.send("You have been added to the Batch role.");
+				output(user.username + " has been added to the Batch role.", langChan);
 			break;
 			case '🇨':
 				member.addRole(cLang);
-				user.send("You have been added to the C role.");
+				output(user.username + " has been added to the C role.", langChan);
 			break;
 			case '🇯':
 				member.addRole(java);
-				user.send("You have been added to the Java role.");
+				output(user.username + " has been added to the Java role.", langChan);
 			break;
 			case '🇵':
 				member.addRole(python);
-				user.send("You have been added to the Python role.");
+				output(user.username + " has been added to the Python role.", langChan);
 			break;
 			case '🇻':
 				member.addRole(vb);
-				user.send("You have been added to the VB role.");
+				output(user.username + " has been added to the VB role.", langChan)
 			break;
 			case '🇼':
 				member.addRole(webdev);
-				user.send("You have been added to the WebDev role.");
+				output(user.username + " has been added to the WebDev role.", langChan)
+			break;
+			case '🇬':
+				member.addRole(go);
+				output(user.username + " has been added to the Go role.", langChan);
+			break;
+			case '🇷':
+				member.addRole(rust);
+				output(user.username + " has been added to the Rust role.", langChan);
+			break;
+			case '⁉️':
+				member.addRole(challenge);
+				output(user.username + " has been added to the Challenge role.", langChan);
 			break;
 			default:
 				messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
@@ -214,27 +272,44 @@ client.on("messageReactionAdd", (messageReaction, user) => { //Add new users to 
 		switch(messageReaction.emoji.id){
 			case windowsReact:
 				member.addRole(windowsOS);
-				user.send("You have been added to the Windows role.");
+				output(user.username + " has been added to the Windows role.", langChan)
 			break;
 			case linuxReact:
 				member.addRole(linuxOS);
-				user.send("You have been added to the Linux role.");
+				output(user.username + " has been added to the Linux role.", langChan)
 			break;
 			case appleReact:
 				member.addRole(appleOS);
-				user.send("You have been added to the Apple role.");
+				output(user.username + " has been added to the Apple role.", langChan);
 			break;
 			case androidReact:
 				member.addRole(androidOS);
-				user.send("You have been added to the Android role.");
+				output(user.username + " has been added to the Android role.", langChan);
 			break;
-			//default:
-				//messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
+			default: messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
+		}
+	} else if (messageReaction.message.id === genRoles){ //reactions on General Roles message
+		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
+		switch(messageReaction.emoji.name){
+			case '🎮':
+				member.addRole(gaming);
+				output(user.username + " has been added to the Gaming role.", langChan)
+			break;
+			case '🎸':
+				member.addRole(music);
+				output(user.username + " has been added to the Music role.", langChan)
+			break;
+			case '💻':
+				member.addRole(tech);
+				output(user.username + " has been added to the Tech role.", langChan);
+			break;
+			default: messageReaction.remove(user); //catch invalid reactions and remove it.  Shouldn't happen but better safe than sorry.
 		}
 	}
 });
 
 client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members role if user removes reaction
+	/* //This functionality was the most abused feature with many users quickly switching back and forth.  This bogs down the bot.
 	if (messageReaction.message.id === ruleMSG){ //ensure we're reacting to the correct message
 		if(messageReaction.emoji.name === '👍'){
 			var member = messageReaction.message.guild.members.find(member => member.id === user.id);
@@ -244,32 +319,45 @@ client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members
 				console.log(member.user.username + " has been removed from the Members role. - "+ timestamp());
 			}
 		}
-	} else if (messageReaction.message.id === langMSG){
+	} else */
+	if (messageReaction.message.id === langMSG){
 		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
 		switch(messageReaction.emoji.name){
 			case '🇧':
 				member.removeRole(batch);
-				user.send("You have been removed from the Batch role.");
+				output(user.username + " has been removed from the Batch role.", langChan);
 			break;
 			case '🇨':
 				member.removeRole(cLang);
-				user.send("You have been removed from the C role.");
+				output(user.username + " has been removed from the C role.", langChan);
 			break;
 			case '🇯':
 				member.removeRole(java);
-				user.send("You have been removed from the Java role.");
+				output(user.username + " has been removed from the Java role.", langChan);
 			break;
 			case '🇵':
 				member.removeRole(python);
-				user.send("You have been removed from the Python role.");
+				output(user.username + " has been removed from the Python role.", langChan);
 			break;
 			case '🇻':
 				member.removeRole(vb);
-				user.send("You have been removed from the VB role.");
+				output(user.username + " has been removed from the VB role.", langChan);
 			break;
 			case '🇼':
 				member.removeRole(webdev);
-				user.send("You have been removed from the WebDev role.");
+				output(user.username + " has been removed from the WebDev role.", langChan);
+			break;
+			case '🇬':
+				member.removeRole(go);
+				output(user.username + " has been removed from the Go role.", langChan);
+			break;
+			case '🇷':
+				member.removeRole(rust);
+				output(user.username + " has been removed from the Rust role.", langChan);
+			break;
+			case '⁉️':
+				member.removeRole(challenge);
+				output(user.username + " has been removed from the Challenge role.", langChan);
 			break;
 		}
 	} else if (messageReaction.message.id === osMSG){
@@ -277,19 +365,35 @@ client.on("messageReactionRemove", (messageReaction, user) => { //Remove Members
 		switch(messageReaction.emoji.id){
 			case windowsReact:
 				member.removeRole(windowsOS);
-				user.send("You have been removed from the Windows role.");
+				output(user.username + " has been removed from the Windows role.", langChan);
 			break;
 			case linuxReact:
 				member.removeRole(linuxOS);
-				user.send("You have been removed from the Linux role.");
+				output(user.username + " has been removed from the Linux role.", langChan);
 			break;
 			case appleReact:
 				member.removeRole(appleOS);
-				user.send("You have been removed from the Apple role.");
+				output(user.username + " has been removed from the Apple role.", langChan);
 			break;
 			case androidReact:
 				member.removeRole(androidOS);
-				user.send("You have been removed from the Android role.");
+				output(user.username + " has been removed from the Android role.", langChan);
+			break;
+		}
+	} else if (messageReaction.message.id === genRoles){ //reactions on General Roles message
+		var member = messageReaction.message.guild.members.find(member => member.id === user.id);
+		switch(messageReaction.emoji.name){
+			case '🎮':
+				member.removeRole(gaming);
+				output(user.username + " has been removed from the Gaming role.", langChan)
+			break;
+			case '🎸':
+				member.removeRole(music);
+				output(user.username + " has been removed from the Music role.", langChan)
+			break;
+			case '💻':
+				member.removeRole(tech);
+				output(user.username + " has been removed from the Tech role.", langChan);
 			break;
 		}
 	}
@@ -318,7 +422,7 @@ function storeNewUser(uid, uname){ //Write users to .json
 	}
 }
 
-function deleteUser(uid){ //remove users from .json
+function deleteUser(uid, username){ //remove users from .json
 	let jsonData = fs.readFileSync("userdata.json")
 	let users = JSON.parse(jsonData).users;
 	
@@ -331,14 +435,27 @@ function deleteUser(uid){ //remove users from .json
 					console.log(err);
 				}
 			});
-
-			let welcomeEmbed = new Discord.RichEmbed()
-				.setTitle("__**Welcome to Nerd Revolt!**__")
-				.setColor(embedColor)
-				.setThumbnail(NRicon)
-				.setDescription("Hey <@" + uid + ">, welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!\n\n\
-				Be sure to check out the <#619317154080227348> channel to select your prefered programming lanugages.  \nYou can also select your roles manually using the !nrRole command.")
-				setTimeout(function(){ client.channels.get(welcomeChan).send(welcomeEmbed); }, 2000);
+			let member = client.guilds.get(gid).members.get(uid);
+			let uIcon = member.user.displayAvatarURL;
+			if (uIcon == undefined){uIcon=NRicon};
+			if(uid==undefined){return}//can't delete undefined also, don't want an ugly message.
+			setTimeout(function(){
+				client.fetchUser(uid)
+				.then(user => {
+					uIcon = user.displayAvatarURL;
+					let currentUser = user.username;
+					let welcomeEmbed = new Discord.RichEmbed()
+						.setTitle("__**Welcome to Nerd Revolt!**__")
+						.setColor(embedColor)
+						.setThumbnail(uIcon)
+						.setDescription("Hey "+currentUser+" (<@" + user.id + ">), welcome to **Nerd Revolt**:tada::hugging:!  Have fun coding with us!\n\n\
+						Be sure to check out the <#"+langChan+"> channel to select your prefered programming lanugages.  \nYou can also select your roles manually using the !nrRole command.")
+						setTimeout(function(){ client.channels.get(welcomeChan).send(welcomeEmbed); }, 2000);
+				}, rejection => {
+					console.log(rejection);
+				});
+			}, 2000);
+			
 		}
 	}
 
@@ -385,7 +502,6 @@ client.on('message', function(message){
 				var cmd2 = args[1]; //second argument
 				var uname = message.author.username; //get user that requested the command
 				var uid = message.author.id;
-				//var uid = msg.author.id; //get user ID that requested the
 				switch(cmd){
 					//!nrPing
 					case 'ping':
@@ -398,32 +514,14 @@ client.on('message', function(message){
 					break;
 					//!nrHello
 					case 'hello':
-						//var uname = message.author.username;
 						message.delete();
 						message.channel.send("Hi there, " + uname + "!");
 					break;
 					//!nrTime
 					case 'time':
 						message.delete();
-						//var uname = message.author.username;
 						var myDate = new Date();
 						message.channel.send("The current time is: " + myDate);
-					break;
-					//!nrPoll
-					case 'poll':
-						var uname = message.author.username;
-						if (cmd2 == null) { //no poll question
-							message.channel.send("Poll formulated incorrectly, please read the help (!nrHelp)");
-						} else if (cmd2.substr(0,1) !== "\"") {//poll question should be in quotations, this for open quote
-								message.channel.send("Poll formulated incorrectly, please read the help (!nrHelp)");
-							}	else if (msg[msg.length -1] !== "\"") {//poll question should be in quotations, this checks for close quote
-									message.channel.send("Poll formulated incorrectly, please read the help (!nrHelp");
-							}	else {
-									var len = msg.length -10  //subtract the command and the quotes from the message length
-									var question = msg.substr(9,len) //pull just the question with no quotes.
-									message.delete();
-								poll(message.channel, uname, question)
-							}
 					break;
 					//!nrJoke
 					case 'joke': 
@@ -446,13 +544,13 @@ client.on('message', function(message){
 							mathGif(message, cmd2);
 						} else message.channel.send("Invalid argument");
 					break;
-					//I'm the humblest
 					case 'role':
 						if (cmd2 == null){
 							rMod.editRoles(message, 'noSelect');
 						} else rMod.editRoles(message, cmd2);
 						message.delete();
 					break;
+					//I'm the humblest
 					case 'humble':
 						message.channel.send("<@"+uid+"> be praised!");
 						message.delete();
@@ -472,6 +570,13 @@ client.on('message', function(message){
 							  });
 						} else suggestion(message.channel, uname, msg.substring(11, msg.length))
 					break;
+					/*
+					case 'test':
+						message.delete();
+						message.channel.send("Successful Test").then(sent => {sent.delete(2000);});
+						console.log(message);
+					break;
+					*/
 
 					//ADMIN COMMANDS BELOW HERE
 					//!nrDelete [1] allow admin to delete multiple messages
@@ -511,6 +616,7 @@ client.on('message', function(message){
 						autoMod("delete",message, cmd2, msg.substring(9, msg.length))
 					break;
 					case 'test':
+						test(message);
 						message.delete();
 					break;
 				}
@@ -520,14 +626,9 @@ client.on('message', function(message){
 
 //Shhh the functions are sleeping down here.
 
-function test(message, postID){
-	if (postID != null){
-		if (postID.length == 18){
-			if (message.member.roles.find(r => r.name === "Admin") || message.member.roles.find(r => r.name === "Moderator")) {
-				require('./massKick.js').massKick(message, postID, client, gid)		
-			} //else do nothing I don't want test to respond to anyone.
-		}	
-	}
+function test(message){
+	//console.log(message)
+	client.emit("guildMemberAdd", message.member)
 }
 
 
@@ -542,22 +643,13 @@ function rules(channel){
 		.setTitle("__**Welcome to Nerd Revolt!**__\n\We're a new community with a wide range of categories!  Programming, Batch, Hardware, Software, Music, Gaming, Hacking and General text and voice channels.\n\n\n\Violations of any of these rules can lead to a ban of the user!")
 		.setColor(embedColor)
 		.setThumbnail(NRicon)
-		.setDescription("1:  Members are not allowed to engage in threatening behavior toward other members. This includes flaming. \n\
-		2:  Don't try to cause harm to member and public, this includes attempt to infect members with any kind of malware infection. \n\
-		3:  Don't be a diiiiiiiiiiiiiick \n\
-		4:  Please try to be a mature person even if your age is under 16 years old. \n\
-		5:  There will be no racial, ethnic, gender based insults or any other personal discrimination.  This will not be tolerated and can lead to immediate suspension. \n\
-		6:  Posting of malicious software results in immediate ban \n\
-		7:  This is not a place for politico-religious arguments, don't outside of #calm-people-discuss-things-politely-in-here. \n\
-		8:  Keep to English language in the code rooms and #general-but-icky-is-the-best \n\
-		9:  Be polite and thoughtful debate on potentially controversial topics.\n\
-		10: Be kind to others.  How hard is it to not be an asshole?\n\
-		11: No advertising of ddos, stress testing, or booter services. \n\
-		12: Do not post personal information that isn't yours. \n\
-		13: Nicknames can only be altered by @Admin s, make your requests to them for sensible name changes. \n\
-		14: You may have your username changed to something more human-typable if it's made of lots of non-keyboard symbols that stop people from properly @-ing you. \n\
-		15: When posting code for interpreted languages (batch, shellscipt, etc.), put it in code tags or upload as a text document to prevent accidental execution.")
-
+		.setDescription("1. Be respectful and polite; this means tolerating other users, treating them with respect, not posting discriminatory or inflammatory content, and not spamming channels.  \n\
+		2. Do not discuss anything illegal or blackhat, send malware, post anything NSFW, or break Discord [Terms of Service](https://discord.com/terms). \n\
+		3. Keep chatting to the relevant channels and in English. \n\
+		4. Members with the 'Super Nerd' role can change their nickname, otherwise, request a change from an Admin. \n\
+		5. When posting code, use code tags (\\`\\`\\`lang <code>\\`\\`\\`) or upload it as a text document. ***Do not upload executables***. \n\
+		6. The Moderation and Admin team have the final say in any moderation decision. If you do not approve, voice your feedback. \n\
+		7. To help people answer your questions: Don't Ask to Ask, just Ask. When possible, search your question before sending it to the server. Whilst we appreciate good questions, we are not your search engine.");
 		channel.send(rulesEmbed);
 }
 
@@ -570,13 +662,11 @@ function help(channel){
 	.addField("!nrRules", "Display the rules.")
 	.addField("!nrJoke", "Dad jokes!")
 	.addField("!nrMath", "Math Gifs. Optional arguments: options 1-21")
-	.addField("!nrPoll \"Question\"", "To create a poll, enter the !nrpoll command followed by your question in quotes\
-	(ex. !nrPoll \"This is the correct format\")")
 	.addField("!nrStat", "Display server statistics")
 	.addField("!nrStat [@mention, username, or user id]", "Display the users statistics using either mention, display name, or ID")
-	.addField("!nrSource", "Displays a link to the source of this bot")
 	.addField("!nrRole", "Add or remove yourself from various roles.  !nrRole without an argument lists roles.  !nrRole [Rolename] adds/removes you from the roll selected.")
 	.addField("!nrSuggest <Your suggestion here>", "Drop a suggestion in the suggestion box.  Quotes not needed around suggestion text")
+	//.addField("!nrSource", "Displays a link to the source of this bot")
 	.addBlankField()
 	.addField("**Staff Commands**", "\u200b")
 	.addField("!nrDelete [number to delete]", "Deletes requested number of posts from the current channel")
@@ -695,7 +785,6 @@ function mathGif(message, choice){
 	const collector = channel.createMessageCollector(filter, { time: 10000 }); //listen for a response
 	if (choice < 1 || choice > 21 || choice === "options"){ //if choice is outside the range of possible
 		mg.options(channel);//display options
-		//console.log(collector); //TESTING
 
 		collector.on('collect', response => {
 			if (parseInt(response) > 0 && parseInt(response) < 22){//if response is between 1 and 21, get gif
